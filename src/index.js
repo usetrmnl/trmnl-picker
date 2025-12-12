@@ -175,8 +175,13 @@ class TRMNLPicker {
       this.elements.modelSelect.appendChild(option)
     })
 
-    // Set default model (first sorted model)
-    const defaultModel = sortedModels[0]
+    // Set default model (prefer TRMNL OG variants, otherwise first sorted)
+    const defaultModel =
+      sortedModels.find(m => m.name === 'og' || (m.label && m.label.toLowerCase() === 'trmnl og')) ||
+      sortedModels.find(m => m.name === 'og_plus') ||
+      sortedModels.find(m => m.name === 'trmnl_original') ||
+      sortedModels[0]
+
     this.elements.modelSelect.value = defaultModel.name
     this.state.selectedModel = defaultModel
 
