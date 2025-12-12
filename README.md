@@ -1,18 +1,8 @@
 # @trmnl/picker
 
-A lightweight, framework-agnostic JavaScript library for managing TRMNL device model and palette selection.
+A lightweight JavaScript library for managing TRMNL device model and palette selection.
 
-## Features
-
-- Zero dependencies
-- Vanilla JavaScript (ES6+)
-- Event-driven architecture
-- Support for both NPM and browser usage
-- **Automatic API data fetching** - optionally fetches models and palettes from TRMNL API
-- **localStorage persistence** - optionally saves user selections across page reloads
-- **Smart filtering** - automatically excludes models/palettes with empty framework_class values
-- Minimal API surface
-- TypeScript-friendly
+This was extracted from our Core web app for [BYOS](https://docs.usetrmnl.com/go/diy/byos) (Bring Your Own Server) and other applications to take advantage of.
 
 ## Installation
 
@@ -35,7 +25,7 @@ npm install @trmnl/picker
 
 ### 1. Create HTML Structure
 
-The library expects a form with specific element IDs:
+The library expects a form with specific element IDs. Apply your favorite CSS styling framework as desired.
 
 ```html
 <form id="picker-form">
@@ -77,9 +67,12 @@ import TRMNLPicker from '@trmnl/picker'
 const picker = await TRMNLPicker.create('picker-form')
 ```
 
-This fetches data from:
+Data is fetched from these API endpoints:
+
 - `https://usetrmnl.com/api/models`
 - `https://usetrmnl.com/api/palettes`
+
+See https://usetrmnl.com/api-docs/ for complete API documentation.
 
 #### Option B: Provide Your Own Data
 
@@ -89,19 +82,18 @@ If you already have the data or need to customize it:
 // Browser usage
 const models = [
   {
-    name: 'trmnl_original',
-    label: 'TRMNL Original',
-    size: '2.9',
+    name: 'og_plus',
+    label: 'TRMNL OG (2-bit)',
+    size: 'md',
     width: 800,
     height: 480,
-    palette_ids: ['bw', '4c', '7c']
+    palette_ids: ['bw', 'gray-4']
   }
 ]
 
 const palettes = [
-  { id: 'bw', name: 'Black & White', framework_class: 'palette-bw' },
-  { id: '4c', name: '4-Color', framework_class: 'palette-4c' },
-  { id: '7c', name: '7-Color', framework_class: 'palette-7c' }
+  { id: 'bw', name: 'Black & White', framework_class: 'screen--1bit' },
+  { id: 'gray-4', name: '4 Grays (2-bit)', framework_class: 'screen--2bit' },
 ]
 
 const picker = new TRMNLPicker('picker-form', { models, palettes })
@@ -117,19 +109,7 @@ const palettes = await fetch('/api/palettes').then(r => r.json())
 const picker = new TRMNLPicker('picker-form', { models, palettes })
 ```
 
-#### Option C: Mix and Match
-
-You can provide one and fetch the other:
-
-```javascript
-// Provide models, fetch palettes
-const picker = await TRMNLPicker.create('picker-form', { models })
-
-// Fetch models, provide palettes
-const picker = await TRMNLPicker.create('picker-form', { palettes })
-```
-
-#### Option D: With localStorage Persistence
+#### With localStorage Persistence
 
 Save user selections across page reloads:
 
@@ -138,19 +118,12 @@ Save user selections across page reloads:
 const picker = await TRMNLPicker.create('picker-form', {
   localStorageKey: 'my-trmnl-picker-state'
 })
-
-// With your own data and localStorage
-const picker = new TRMNLPicker('picker-form', {
-  models,
-  palettes,
-  localStorageKey: 'my-trmnl-picker-state'
-})
 ```
 
 The picker will automatically:
-- Load the last selected model, palette, orientation, and dark mode from localStorage on initialization
+- Load the last selected preferences from localStorage on initialization
 - Save any changes to localStorage whenever the user makes a selection
-- Fall back to defaults (TRMNL OG model) if no saved state exists
+- Fall back to defaults if no saved state exists
 
 ### 3. Listen for Changes
 
@@ -159,7 +132,7 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
   const { screenClasses, state } = event.detail
 
   console.log('Screen classes:', screenClasses)
-  // ['palette-bw', 'screen--trmnl_original', 'screen--2.9', 'screen--landscape', 'screen--1x']
+  // ['screen--1bit', 'screen--trmnl_original', 'screen--2.9', 'screen--landscape', 'screen--1x']
 
   console.log('State:', state)
   // { model: {...}, palette: {...}, isPortrait: false, isDarkMode: false }
@@ -227,12 +200,12 @@ Direct constructor for synchronous initialization with data already available.
 **Model Object Structure:**
 ```javascript
 {
-  name: 'trmnl_original',      // Unique identifier
-  label: 'TRMNL Original',     // Display name
-  size: '2.9',                 // Screen size
-  width: 800,                  // Width in pixels
-  height: 480,                 // Height in pixels
-  palette_ids: ['bw', '4c']    // Available palettes for this model
+  name: 'trmnl_original',       // Unique identifier
+  label: 'TRMNL Original',      // Display name
+  size: 'md',                   // Screen size class
+  width: 800,                   // Width in pixels
+  height: 480,                  // Height in pixels
+  palette_ids: ['bw', 'gray-4'] // Available palettes for this model
 }
 ```
 
@@ -241,15 +214,9 @@ Direct constructor for synchronous initialization with data already available.
 {
   id: 'bw',                          // Palette identifier
   name: 'Black & White',             // Display name
-  framework_class: 'palette-bw'      // CSS class for styling (required)
+  framework_class: 'screen--1bit'      // CSS class for styling (required)
 }
 ```
-
-**Important:** The library automatically filters out:
-- Models where **all** their palettes have empty or missing `framework_class` values
-- Individual palettes with empty or missing `framework_class` values
-
-This ensures that only valid, usable models and palettes are displayed in the picker.
 
 ### Methods
 
@@ -286,19 +253,19 @@ const state = picker.getState()
   model: {
     name: 'trmnl_original',
     label: 'TRMNL Original',
-    size: '2.9',
+    size: 'md',
     width: 800,
     height: 480
   },
   palette: {
     id: 'bw',
     name: 'Black & White',
-    framework_class: 'palette-bw'
+    framework_class: 'screen--1bit'
   },
   isPortrait: false,
   isDarkMode: false,
   screenClasses: [
-    'palette-bw',
+    'screen--1bit',
     'screen--trmnl_original',
     'screen--2.9',
     'screen--landscape',
@@ -336,7 +303,7 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
 ```javascript
 {
   screenClasses: [
-    'palette-bw',
+    'screen--1bit',
     'screen--trmnl_original',
     'screen--2.9',
     'screen--landscape',
@@ -355,7 +322,7 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
 
 The library generates CSS classes in the following order:
 
-1. **Palette class**: From `palette.framework_class` (e.g., `palette-bw`)
+1. **Palette class**: From `palette.framework_class` (e.g., `screen--1bit`)
 2. **Model name**: `screen--{model.name}` (e.g., `screen--trmnl_original`)
 3. **Model size**: `screen--{model.size}` (e.g., `screen--2.9`)
 4. **Orientation**: `screen--portrait` or `screen--landscape`
@@ -381,7 +348,7 @@ The library expects the following elements within the form:
 
 ### Complete Working Example
 
-See `example/index.html` for a complete working example with styling.
+See [example/index.html](example/index.html) for a complete working example with styling.
 
 ### Applying Classes to Screen Elements
 
@@ -447,52 +414,6 @@ function ScreenPicker({ models, palettes, onChange }) {
     </form>
   )
 }
-```
-
-## Migration from Stimulus Version
-
-If you're migrating from the Stimulus-based controller:
-
-### Key Differences
-
-**Removed Features:**
-- No localStorage persistence (implement in your app if needed)
-- No BroadcastChannel synchronization
-- No automatic DOM manipulation of `.screen` elements
-- No automatic page reload
-
-**Data Model Changes:**
-- Use `model.name` instead of `model.keyname`
-- API response field `name` maps directly (e.g., `"trmnl_original"`)
-
-### Migration Steps
-
-1. Remove Stimulus controller and data attributes
-2. Add standard HTML form with required element IDs
-3. Include `@trmnl/picker` library
-4. Initialize picker with `new TRMNLPicker()`
-5. Listen to `changed` event and apply classes manually
-6. Implement localStorage persistence if needed (application concern)
-
-**Before (Stimulus):**
-```erb
-<div data-controller="screen-picker"
-     data-screen-picker-models-value="<%= models.to_json %>"
-     data-screen-picker-palettes-value="<%= palettes.to_json %>">
-  <select data-screen-picker-target="modelSelect"></select>
-</div>
-```
-
-**After (Vanilla):**
-```html
-<form id="picker-form">
-  <select id="model-select"></select>
-</form>
-
-<script type="module">
-  import TRMNLPicker from '@trmnl/picker'
-  const picker = new TRMNLPicker('picker-form', models, palettes)
-</script>
 ```
 
 ## Browser Support

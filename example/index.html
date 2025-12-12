@@ -4,230 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TRMNL Picker - Demo</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      margin: 0;
-      padding: 2rem;
-      background: #f5f5f5;
-      line-height: 1.6;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      color: #333;
-      margin-bottom: 0.5rem;
-    }
-
-    .description {
-      color: #666;
-      margin-bottom: 2rem;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 0.25rem 0.5rem;
-      background: #4a90e2;
-      color: white;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-left: 0.5rem;
-    }
-
-    .badge.success {
-      background: #52c41a;
-    }
-
-    .badge.loading {
-      background: #faad14;
-    }
-
-    .picker-wrapper {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      margin-bottom: 2rem;
-    }
-
-    .picker-form {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-
-    .picker-select,
-    .picker-button {
-      padding: 0.5rem 1rem;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      background: white;
-      cursor: pointer;
-      font-size: 0.875rem;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-
-    .picker-select:hover,
-    .picker-button:hover:not(:disabled) {
-      background: #f9f9f9;
-      border-color: #ccc;
-    }
-
-    .picker-select:focus,
-    .picker-button:focus {
-      outline: none;
-      border-color: #4a90e2;
-      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-    }
-
-    .picker-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      background: #f5f5f5;
-    }
-
-    .divider {
-      width: 1px;
-      height: 2rem;
-      background: #e0e0e0;
-      margin: 0 0.25rem;
-    }
-
-    .output-section {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      margin-bottom: 2rem;
-    }
-
-    .output-section h2 {
-      margin: 0 0 1rem 0;
-      color: #333;
-      font-size: 1.25rem;
-    }
-
-    .output-content {
-      background: #f8f9fa;
-      padding: 1rem;
-      border-radius: 4px;
-      border: 1px solid #e0e0e0;
-    }
-
-    pre {
-      margin: 0;
-      overflow-x: auto;
-      font-size: 0.875rem;
-      line-height: 1.5;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 2rem;
-      color: #666;
-    }
-
-    .spinner {
-      display: inline-block;
-      width: 40px;
-      height: 40px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #4a90e2;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 1rem;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .info-box {
-      background: #e6f7ff;
-      border: 1px solid #91d5ff;
-      border-radius: 6px;
-      padding: 1rem;
-      margin-bottom: 2rem;
-      color: #0050b3;
-    }
-
-    .info-box strong {
-      color: #003a8c;
-    }
-
-    .screen-preview {
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      display: none;
-    }
-
-    .screen-preview.visible {
-      display: block;
-    }
-
-    .screen-preview h2 {
-      margin: 0 0 1.5rem 0;
-      color: #333;
-      font-size: 1.25rem;
-    }
-
-    .screen {
-      display: inline-block;
-      border: 2px solid #333;
-      background: white;
-      position: relative;
-      transition: all 0.3s ease;
-      min-width: 200px;
-      min-height: 100px;
-    }
-
-    .screen--portrait {
-      transform: rotate(90deg);
-      transform-origin: center;
-      margin: 100px 0;
-    }
-
-    .screen--dark-mode {
-      background: #1a1a1a;
-      border-color: #666;
-    }
-
-    .screen-content {
-      padding: 1rem;
-      text-align: center;
-      color: #666;
-    }
-
-    .screen--dark-mode .screen-content {
-      color: #ccc;
-    }
-  </style>
+  <link rel="stylesheet" href="https://usetrmnl.com/css/latest/plugins.css" />
+  <script src="https://usetrmnl.com/js/latest/plugins.js"></script>
+  
+  <!-- Begin Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <!-- End Inter font -->
+  
+  <link rel="stylesheet" href="main.css" />
 </head>
 <body>
   <div class="container">
-    <h1>@trmnl/picker <span class="badge loading" id="status-badge">Loading</span></h1>
+    <h1>@trmnl/picker</h1>
     <p class="description">Interactive device model and palette selector</p>
 
-    <div class="info-box">
-      <strong>Features:</strong> This demo showcases the picker with automatic data fetching and localStorage persistence.
-      Your selections are saved automatically and will be restored when you reload the page.
-    </div>
-
-    <div class="picker-wrapper">
+    <div class="panel">
       <div id="loading-state" class="loading">
         <div class="spinner"></div>
         <div>Loading picker...</div>
@@ -256,34 +50,450 @@
       </form>
     </div>
 
-    <div class="output-section">
-      <h2>Event Output <span class="badge" id="event-count">0 events</span></h2>
-      <div class="output-content">
-        <pre id="event-output">Waiting for picker to load...</pre>
+    <div class="screen-preview trmnl" id="screen-preview">
+      <div class="screen screen--2bit screen--og_plus screen--md screen--landscape screen--1x">
+        <div class="view view--full">
+          <div class="layout layout--col gap--space-between">
+            <div class="grid grid--cols-2">
+              <div class="item">
+                <div class="meta"></div>
+                <div class="content">
+                  <span class="value value--tnums value--xxxlarge" data-value-fit="true" style="font-variation-settings: &quot;wght&quot; 350; font-size: 112px; font-weight: 350; line-height: 126px;">10004</span>
+                  <span class="label">Contributions in last year</span>
+                </div>
+              </div>
+              <div class="flex flex--col gap--medium">
+                <div class="grid grid--cols-2" style="gap: 11px;">
+                  <div class="item">
+                    <div class="meta"></div>
+                    <div class="content">
+                      <span class="value value--tnums">19</span>
+                      <span class="label">Longest streak</span>
+                    </div>
+                  </div>
+                  <div class="item">
+                    <div class="meta"></div>
+                    <div class="content">
+                      <span class="value value--tnums">3</span>
+                      <span class="label">Current streak</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="grid grid--cols-2" style="gap: 11px;">
+                  <div class="item">
+                    <div class="meta"></div>
+                    <div class="content">
+                      <span class="value value--tnums">27</span>
+                      <span class="label">Most in a day</span>
+                    </div>
+                  </div>
+                  <div class="item">
+                    <div class="meta"></div>
+                    <div class="content">
+                      <span class="value value--tnums">2.45</span>
+                      <span class="label">Average per day</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div id="github_commit_graph">
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-35"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-25"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-25"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-20"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-35"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day bg--gray-15"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg-black"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-35"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-25"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-10"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-25"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg-black"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-35"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-35"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-35"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day bg-black"></span>
+                  <span class="day bg--gray-35"></span>
+                  <span class="day bg--gray-25"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-35"></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-25"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-15"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-25"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-35"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-40"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-15"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-35"></span>
+                  <span class="day bg--gray-15"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-20"></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-60"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-30"></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-15"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-50"></span>
+                  <span class="day "></span>
+                  <span class="day bg--gray-45"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day bg--gray-55"></span>
+                  <span class="day "></span>
+                  <span class="day "></span>
+            </div>
+          </div>
+
+          <div class="title_bar">
+            <img class="image" alt="" src="https://usetrmnl.com/images/plugins/github--render.svg">
+            <span class="title">GitHub</span>
+            <span class="instance">@ryanckulp</span>
+          </div>
+        </div>
+        <link rel="stylesheet" href="https://usetrmnl.com/assets/plugins/github_commit_graph-950a773f8a8396624970f5decdf486d40299e22aa0c9bfa5acd2ca1dc3048b5f.css" media="all">
       </div>
     </div>
 
-    <div class="screen-preview" id="screen-preview">
-      <h2>Screen Preview</h2>
-      <div class="screen">
-        <div class="screen-content">
-          <strong>TRMNL Screen Preview</strong>
-        </div>
-      </div>
+    <div class="panel">
+      <pre id="event-output">Waiting for picker to load...</pre>
     </div>
   </div>
 
   <script src="../dist/trmnl-picker.min.js"></script>
   <script>
     let picker = null
-    let eventCount = 0
 
     // Listen for changes (including initial state)
     // Attach listener BEFORE creating picker to catch initial event
     document.getElementById('picker-form').addEventListener('changed', (event) => {
-      eventCount++
-      document.getElementById('event-count').textContent = `${eventCount} event${eventCount !== 1 ? 's' : ''}`
-
       const { screenClasses, state } = event.detail
 
       // Display event data
@@ -309,6 +519,8 @@
       screen.className = filteredClasses.join(' ')
 
       console.log('Picker changed:', event.detail)
+
+      terminalize();
     })
 
     // Initialize picker
@@ -323,9 +535,6 @@
         document.getElementById('loading-state').style.display = 'none'
         document.getElementById('picker-form').style.display = 'flex'
         document.getElementById('screen-preview').classList.add('visible')
-        document.getElementById('status-badge').textContent = 'Ready'
-        document.getElementById('status-badge').classList.remove('loading')
-        document.getElementById('status-badge').classList.add('success')
 
         console.log('✓ Picker initialized successfully')
         console.log('Models:', picker.models.length)
@@ -339,9 +548,6 @@
             ${error.message}
           </div>
         `
-        document.getElementById('status-badge').textContent = 'Error'
-        document.getElementById('status-badge').classList.remove('loading')
-        document.getElementById('status-badge').style.background = '#ff4d4f'
       }
     }
 
