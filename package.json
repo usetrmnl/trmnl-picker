@@ -1,0 +1,39 @@
+{
+  "name": "@trmnl/picker",
+  "version": "1.0.0",
+  "description": "Vanilla JavaScript library for TRMNL device model and palette selection",
+  "main": "dist/trmnl-picker.js",
+  "module": "dist/trmnl-picker.esm.js",
+  "browser": "dist/trmnl-picker.min.js",
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "npm run build:esm && npm run build:browser && npm run build:browser:min",
+    "build:esm": "esbuild src/index.js --bundle --format=esm --outfile=dist/trmnl-picker.esm.js --sourcemap",
+    "build:browser": "esbuild src/index.js --bundle --format=iife --global-name=TRMNLPicker --outfile=dist/trmnl-picker.js --sourcemap --footer:js=\"TRMNLPicker=TRMNLPicker.default;\"",
+    "build:browser:min": "esbuild src/index.js --bundle --format=iife --global-name=TRMNLPicker --minify --outfile=dist/trmnl-picker.min.js --sourcemap --footer:js=\"TRMNLPicker=TRMNLPicker.default;\"",
+    "watch": "npm run build:browser -- --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "trmnl",
+    "picker",
+    "screen",
+    "device",
+    "palette",
+    "vanilla-js"
+  ],
+  "author": "TRMNL",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.20.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/trmnl/trmnl-picker.git"
+  }
+}

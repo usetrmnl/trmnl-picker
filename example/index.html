@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRMNL Picker - Browser Example</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: #f5f5f5;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    .picker-wrapper {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+    }
+
+    .picker-form {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .picker-select,
+    .picker-button {
+      padding: 0.5rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .picker-select:hover,
+    .picker-button:hover:not(:disabled) {
+      background: #f9f9f9;
+      border-color: #ccc;
+    }
+
+    .picker-select:focus,
+    .picker-button:focus {
+      outline: none;
+      border-color: #4a90e2;
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+
+    .picker-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: #f5f5f5;
+    }
+
+    .divider {
+      width: 1px;
+      height: 2rem;
+      background: #e0e0e0;
+      margin: 0 0.25rem;
+    }
+
+    .output-section {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+    }
+
+    .output-section h2 {
+      margin: 0 0 1rem 0;
+      color: #333;
+      font-size: 1.25rem;
+    }
+
+    .output-content {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 4px;
+      border: 1px solid #e0e0e0;
+    }
+
+    pre {
+      margin: 0;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .screen-preview {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .screen-preview h2 {
+      margin: 0 0 1.5rem 0;
+      color: #333;
+      font-size: 1.25rem;
+    }
+
+    .screen {
+      display: inline-block;
+      border: 2px solid #333;
+      background: white;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .screen--trmnl_original {
+      width: 400px;
+      height: 240px;
+    }
+
+    .screen--og_plus {
+      width: 296px;
+      height: 128px;
+    }
+
+    .screen--pro {
+      width: 800px;
+      height: 480px;
+      max-width: 100%;
+    }
+
+    .screen--portrait {
+      transform: rotate(90deg);
+      transform-origin: center;
+      margin: 100px 0;
+    }
+
+    .screen--dark-mode {
+      background: #1a1a1a;
+      border-color: #666;
+    }
+
+    .screen-content {
+      padding: 1rem;
+      text-align: center;
+      color: #666;
+    }
+
+    .screen--dark-mode .screen-content {
+      color: #ccc;
+    }
+
+    .palette-bw { background: white; color: black; }
+    .palette-4c { background: linear-gradient(to right, #fff, #ff0, #f00, #000); }
+    .palette-7c { background: linear-gradient(to right, #fff, #ff0, #f80, #f00, #00f, #0f0, #000); }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #4a90e2;
+      color: white;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>@trmnl/picker - Browser Example</h1>
+    <p>Vanilla JavaScript library for TRMNL device model and palette selection</p>
+
+    <div class="picker-wrapper">
+      <form id="picker-form" class="picker-form">
+        <select id="model-select" class="picker-select"></select>
+
+        <select id="palette-select" class="picker-select"></select>
+
+        <div class="divider"></div>
+
+        <button type="button" id="orientation-toggle" class="picker-button">
+          <span data-orientation-text>Landscape</span>
+        </button>
+
+        <button type="button" id="dark-mode-toggle" class="picker-button">
+          <span data-dark-mode-text>Light Mode</span>
+        </button>
+
+        <div class="divider"></div>
+
+        <button type="button" id="reset-button" class="picker-button">
+          Reset
+        </button>
+      </form>
+    </div>
+
+    <div class="output-section">
+      <h2>Event Output <span class="badge" id="event-count">0 events</span></h2>
+      <div class="output-content">
+        <pre id="event-output">Waiting for changes...</pre>
+      </div>
+    </div>
+
+    <div class="screen-preview">
+      <h2>Screen Preview</h2>
+      <div class="screen">
+        <div class="screen-content">
+          <strong>TRMNL Screen Preview</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../dist/trmnl-picker.min.js"></script>
+  <script>
+    // Sample data (simulating API responses)
+    const models = [
+      {
+        name: 'trmnl_original',
+        label: 'TRMNL Original',
+        description: 'Original TRMNL model',
+        width: 800,
+        height: 480,
+        colors: 2,
+        bit_depth: 1,
+        scale_factor: 1.0,
+        rotation: 90,
+        mime_type: 'image/png',
+        offset_x: 10,
+        offset_y: 20,
+        published_at: '2023-10-01T12:00:00Z',
+        kind: 'trmnl',
+        size: '2.9',
+        palette_ids: ['bw', '4c', '7c']
+      },
+      {
+        name: 'og_plus',
+        label: 'TRMNL OG+',
+        description: 'OG Plus model',
+        width: 296,
+        height: 128,
+        size: '2.9',
+        palette_ids: ['bw', '4c']
+      },
+      {
+        name: 'pro',
+        label: 'TRMNL Pro',
+        description: 'Pro model with full color',
+        width: 800,
+        height: 480,
+        size: '7.3',
+        palette_ids: ['7c', 'bw']
+      }
+    ]
+
+    const palettes = [
+      { id: 'bw', name: 'Black & White', framework_class: 'palette-bw' },
+      { id: '4c', name: '4-Color', framework_class: 'palette-4c' },
+      { id: '7c', name: '7-Color', framework_class: 'palette-7c' }
+    ]
+
+    // Initialize picker
+    const picker = new TRMNLPicker('picker-form', models, palettes)
+
+    // Track events
+    let eventCount = 0
+
+    // Listen for changes
+    document.getElementById('picker-form').addEventListener('changed', (event) => {
+      eventCount++
+      document.getElementById('event-count').textContent = `${eventCount} event${eventCount !== 1 ? 's' : ''}`
+
+      const { screenClasses, state } = event.detail
+
+      // Display event data
+      document.getElementById('event-output').textContent = JSON.stringify({
+        screenClasses,
+        state
+      }, null, 2)
+
+      // Apply classes to screen preview
+      const screen = document.querySelector('.screen')
+      const currentClasses = screen.className.split(' ')
+
+      // Remove old screen classes
+      const filteredClasses = currentClasses.filter(c => {
+        if (!c.startsWith('screen--')) return true
+        if (c.startsWith('screen--scale-')) return true
+        if (c === 'screen--no-bleed') return true
+        return false
+      })
+
+      // Add new screen classes
+      filteredClasses.push(...screenClasses)
+      screen.className = filteredClasses.join(' ')
+
+      console.log('Picker changed:', event.detail)
+    })
+
+    // Example: Programmatic update after 3 seconds
+    setTimeout(() => {
+      console.log('Programmatically updating picker...')
+      picker.update({
+        modelName: 'pro',
+        paletteId: '7c',
+        isPortrait: false,
+        isDarkMode: false
+      })
+    }, 3000)
+
+    // Display current state in console
+    console.log('Initial state:', picker.getState())
+  </script>
+</body>
+</html>
