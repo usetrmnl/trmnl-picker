@@ -10,6 +10,7 @@ A lightweight, framework-agnostic JavaScript library for managing TRMNL device m
 - Support for both NPM and browser usage
 - **Automatic API data fetching** - optionally fetches models and palettes from TRMNL API
 - **localStorage persistence** - optionally saves user selections across page reloads
+- **Smart filtering** - automatically excludes models/palettes with empty framework_class values
 - Minimal API surface
 - TypeScript-friendly
 
@@ -240,9 +241,15 @@ Direct constructor for synchronous initialization with data already available.
 {
   id: 'bw',                          // Palette identifier
   name: 'Black & White',             // Display name
-  framework_class: 'palette-bw'      // CSS class for styling
+  framework_class: 'palette-bw'      // CSS class for styling (required)
 }
 ```
+
+**Important:** The library automatically filters out:
+- Models where **all** their palettes have empty or missing `framework_class` values
+- Individual palettes with empty or missing `framework_class` values
+
+This ensures that only valid, usable models and palettes are displayed in the picker.
 
 ### Methods
 

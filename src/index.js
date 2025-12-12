@@ -89,6 +89,13 @@ class TRMNLPicker {
         throw new Error('TRMNLPicker: palettes must be a non-empty array')
       }
 
+      // Filter out models where all palettes have empty framework_class
+      this.models = this._filterValidModels()
+
+      if (this.models.length === 0) {
+        throw new Error('TRMNLPicker: no valid models found (all models have palettes with empty framework_class)')
+      }
+
       // Initialize DOM elements and bind events
       this._initializeElements()
       this._bindEvents()
@@ -96,6 +103,40 @@ class TRMNLPicker {
       // Set initial state (will load from localStorage if available)
       this._setInitialState()
     }
+  }
+
+  /**
+   * Filter out models where all their palettes have empty framework_class
+   * @private
+   * @returns {Array<Object>} Filtered models array
+   */
+  _filterValidModels() {
+    return this.models.filter(model => {
+      // Check if at least one palette for this model has a non-empty framework_class
+      return model.palette_ids.some(paletteId => {
+        const palette = this.palettes.find(p => p.id === paletteId)
+        return palette && palette.framework_class && palette.framework_class.trim() !== ''
+      })
+    })
+  }
+
+  /**
+   * Get the first valid palette ID for a model (one with non-empty framework_class)
+   * @private
+   * @param {Object} model - Model object
+   * @returns {string|null} First valid palette ID or null
+   */
+  _getFirstValidPaletteId(model) {
+    if (!model) return null
+
+    for (const paletteId of model.palette_ids) {
+      const palette = this.palettes.find(p => p.id === paletteId)
+      if (palette && palette.framework_class && palette.framework_class.trim() !== '') {
+        return paletteId
+      }
+    }
+
+    return null
   }
 
   /**
@@ -202,10 +243,20 @@ class TRMNLPicker {
 
     // Set palette (from localStorage or default)
     let paletteId = null
-    if (savedState && savedState.paletteId && selectedModel.palette_ids.includes(savedState.paletteId)) {
-      paletteId = savedState.paletteId
-    } else {
-      paletteId = selectedModel.palette_ids[0]
+    if (savedState && savedState.paletteId) {
+      // Check if saved palette is valid (has framework_class) and is in this model's palettes
+      const savedPalette = this.palettes.find(p => p.id === savedState.paletteId)
+      if (savedPalette &&
+          savedPalette.framework_class &&
+          savedPalette.framework_class.trim() !== '' &&
+          selectedModel.palette_ids.includes(savedState.paletteId)) {
+        paletteId = savedState.paletteId
+      }
+    }
+
+    if (!paletteId) {
+      // Get first valid palette (one with non-empty framework_class)
+      paletteId = this._getFirstValidPaletteId(selectedModel)
     }
 
     this.elements.paletteSelect.value = paletteId
@@ -248,10 +299,10 @@ class TRMNLPicker {
     // Clear existing options
     this.elements.paletteSelect.innerHTML = ''
 
-    // Add options for each palette_id in the model
+    // Add options for each palette_id in the model (only if framework_class is not empty)
     model.palette_ids.forEach(paletteId => {
       const palette = this.palettes.find(p => p.id === paletteId)
-      if (palette) {
+      if (palette && palette.framework_class && palette.framework_class.trim() !== '') {
         const option = document.createElement('option')
         option.value = palette.id
         option.textContent = palette.name
@@ -396,8 +447,8 @@ class TRMNLPicker {
     // Repopulate palettes for new model
     this._populatePalettes()
 
-    // Select first palette of new model
-    const firstPaletteId = model.palette_ids[0]
+    // Select first valid palette of new model
+    const firstPaletteId = this._getFirstValidPaletteId(model)
     this.elements.paletteSelect.value = firstPaletteId
     this.state.selectedPalette = this.palettes.find(p => p.id === firstPaletteId)
 
@@ -458,15 +509,15 @@ class TRMNLPicker {
   }
 
   /**
-   * Reset palette to model's default (first palette)
+   * Reset palette to model's default (first valid palette)
    * @private
    */
   _resetToDefaults() {
     const model = this.state.selectedModel
     if (!model) return
 
-    // Reset to first palette of current model
-    const firstPaletteId = model.palette_ids[0]
+    // Reset to first valid palette of current model
+    const firstPaletteId = this._getFirstValidPaletteId(model)
     this.elements.paletteSelect.value = firstPaletteId
     this.state.selectedPalette = this.palettes.find(p => p.id === firstPaletteId)
 
@@ -487,7 +538,8 @@ class TRMNLPicker {
     const model = this.state.selectedModel
     if (!model) return
 
-    const isAtDefaults = this.elements.paletteSelect.value === String(model.palette_ids[0])
+    const firstValidPaletteId = this._getFirstValidPaletteId(model)
+    const isAtDefaults = this.elements.paletteSelect.value === String(firstValidPaletteId)
 
     this.elements.resetButton.disabled = isAtDefaults
 
