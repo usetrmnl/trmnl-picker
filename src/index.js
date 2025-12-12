@@ -201,21 +201,54 @@ class TRMNLPicker {
    * @private
    */
   _setInitialState() {
-    // Sort models alphabetically by label
-    const sortedModels = [...this.models].sort((a, b) => {
+    // Separate models into TRMNL and BYOD groups
+    const trmnlModels = this.models.filter(m => m.kind === 'trmnl')
+    const byodModels = this.models.filter(m => m.kind !== 'trmnl')
+
+    // Sort each group alphabetically by label
+    const sortTRMNL = [...trmnlModels].sort((a, b) => {
       const labelA = (a.label || a.name).toLowerCase()
       const labelB = (b.label || b.name).toLowerCase()
       return labelA.localeCompare(labelB)
     })
 
-    // Populate model select with sorted models
-    this.elements.modelSelect.innerHTML = ''
-    sortedModels.forEach(model => {
-      const option = document.createElement('option')
-      option.value = model.name
-      option.textContent = model.label || model.name
-      this.elements.modelSelect.appendChild(option)
+    const sortBYOD = [...byodModels].sort((a, b) => {
+      const labelA = (a.label || a.name).toLowerCase()
+      const labelB = (b.label || b.name).toLowerCase()
+      return labelA.localeCompare(labelB)
     })
+
+    // Populate model select with grouped models
+    this.elements.modelSelect.innerHTML = ''
+
+    // Add TRMNL group
+    if (sortTRMNL.length > 0) {
+      const trmnlGroup = document.createElement('optgroup')
+      trmnlGroup.label = 'TRMNL'
+      sortTRMNL.forEach(model => {
+        const option = document.createElement('option')
+        option.value = model.name
+        option.textContent = model.label || model.name
+        trmnlGroup.appendChild(option)
+      })
+      this.elements.modelSelect.appendChild(trmnlGroup)
+    }
+
+    // Add BYOD group
+    if (sortBYOD.length > 0) {
+      const byodGroup = document.createElement('optgroup')
+      byodGroup.label = 'BYOD'
+      sortBYOD.forEach(model => {
+        const option = document.createElement('option')
+        option.value = model.name
+        option.textContent = model.label || model.name
+        byodGroup.appendChild(option)
+      })
+      this.elements.modelSelect.appendChild(byodGroup)
+    }
+
+    // Keep combined sorted list for default selection logic
+    const sortedModels = [...sortTRMNL, ...sortBYOD]
 
     // Load saved state from localStorage if available
     const savedState = this._loadFromLocalStorage()
