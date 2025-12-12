@@ -521,6 +521,9 @@ class TRMNLPicker {
       this.elements.orientationText.textContent = this.state.isPortrait ? 'Portrait' : 'Landscape'
     }
 
+    // Update reset button state
+    this._updateResetButton()
+
     // Emit change event
     this._emitChangeEvent()
   }
@@ -537,12 +540,15 @@ class TRMNLPicker {
       this.elements.darkModeText.textContent = this.state.isDarkMode ? 'Dark Mode' : 'Light Mode'
     }
 
+    // Update reset button state
+    this._updateResetButton()
+
     // Emit change event
     this._emitChangeEvent()
   }
 
   /**
-   * Reset palette to model's default (first valid palette)
+   * Reset to defaults: first valid palette, landscape orientation, light mode
    * @private
    */
   _resetToDefaults() {
@@ -554,6 +560,18 @@ class TRMNLPicker {
     this.elements.paletteSelect.value = firstPaletteId
     this.state.selectedPalette = this.palettes.find(p => p.id === firstPaletteId)
 
+    // Reset to landscape orientation
+    this.state.isPortrait = false
+    if (this.elements.orientationText) {
+      this.elements.orientationText.textContent = 'Landscape'
+    }
+
+    // Reset to light mode
+    this.state.isDarkMode = false
+    if (this.elements.darkModeText) {
+      this.elements.darkModeText.textContent = 'Light Mode'
+    }
+
     // Update UI
     this._updateResetButton()
 
@@ -563,6 +581,7 @@ class TRMNLPicker {
 
   /**
    * Update reset button enabled/disabled state
+   * Button is disabled only when palette, orientation, and dark mode are all at defaults
    * @private
    */
   _updateResetButton() {
@@ -572,7 +591,11 @@ class TRMNLPicker {
     if (!model) return
 
     const firstValidPaletteId = this._getFirstValidPaletteId(model)
-    const isAtDefaults = this.elements.paletteSelect.value === String(firstValidPaletteId)
+    const isPaletteDefault = this.elements.paletteSelect.value === String(firstValidPaletteId)
+    const isOrientationDefault = this.state.isPortrait === false
+    const isDarkModeDefault = this.state.isDarkMode === false
+
+    const isAtDefaults = isPaletteDefault && isOrientationDefault && isDarkModeDefault
 
     this.elements.resetButton.disabled = isAtDefaults
 

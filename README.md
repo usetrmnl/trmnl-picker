@@ -340,7 +340,7 @@ The library expects the following elements within the form:
 ### Optional Elements
 - `#orientation-toggle` - Button to toggle portrait/landscape
 - `#dark-mode-toggle` - Button to toggle dark mode
-- `#reset-button` - Button to reset palette to model's default
+- `#reset-button` - Button to reset to defaults (first palette, landscape orientation, light mode)
 - `[data-orientation-text]` - Text element showing current orientation
 - `[data-dark-mode-text]` - Text element showing current mode
 
