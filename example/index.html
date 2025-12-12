@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TRMNL Picker - Browser Example</title>
+  <title>TRMNL Picker - Demo</title>
   <style>
     * {
       box-sizing: border-box;
@@ -27,9 +27,28 @@
       margin-bottom: 0.5rem;
     }
 
-    p {
+    .description {
       color: #666;
       margin-bottom: 2rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #4a90e2;
+      color: white;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+
+    .badge.success {
+      background: #52c41a;
+    }
+
+    .badge.loading {
+      background: #faad14;
     }
 
     .picker-wrapper {
@@ -113,11 +132,51 @@
       line-height: 1.5;
     }
 
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #4a90e2;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .info-box {
+      background: #e6f7ff;
+      border: 1px solid #91d5ff;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      color: #0050b3;
+    }
+
+    .info-box strong {
+      color: #003a8c;
+    }
+
     .screen-preview {
       background: white;
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+
+    .screen-preview.visible {
+      display: block;
     }
 
     .screen-preview h2 {
@@ -132,22 +191,8 @@
       background: white;
       position: relative;
       transition: all 0.3s ease;
-    }
-
-    .screen--trmnl_original {
-      width: 400px;
-      height: 240px;
-    }
-
-    .screen--og_plus {
-      width: 296px;
-      height: 128px;
-    }
-
-    .screen--pro {
-      width: 800px;
-      height: 480px;
-      max-width: 100%;
+      min-width: 200px;
+      min-height: 100px;
     }
 
     .screen--portrait {
@@ -170,30 +215,25 @@
     .screen--dark-mode .screen-content {
       color: #ccc;
     }
-
-    .palette-bw { background: white; color: black; }
-    .palette-4c { background: linear-gradient(to right, #fff, #ff0, #f00, #000); }
-    .palette-7c { background: linear-gradient(to right, #fff, #ff0, #f80, #f00, #00f, #0f0, #000); }
-
-    .badge {
-      display: inline-block;
-      padding: 0.25rem 0.5rem;
-      background: #4a90e2;
-      color: white;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-left: 0.5rem;
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>@trmnl/picker - Browser Example</h1>
-    <p>Vanilla JavaScript library for TRMNL device model and palette selection</p>
+    <h1>@trmnl/picker <span class="badge loading" id="status-badge">Loading</span></h1>
+    <p class="description">Interactive device model and palette selector</p>
+
+    <div class="info-box">
+      <strong>Features:</strong> This demo showcases the picker with automatic data fetching and localStorage persistence.
+      Your selections are saved automatically and will be restored when you reload the page.
+    </div>
 
     <div class="picker-wrapper">
-      <form id="picker-form" class="picker-form">
+      <div id="loading-state" class="loading">
+        <div class="spinner"></div>
+        <div>Loading picker...</div>
+      </div>
+
+      <form id="picker-form" class="picker-form" style="display: none;">
         <select id="model-select" class="picker-select"></select>
 
         <select id="palette-select" class="picker-select"></select>
@@ -219,11 +259,11 @@
     <div class="output-section">
       <h2>Event Output <span class="badge" id="event-count">0 events</span></h2>
       <div class="output-content">
-        <pre id="event-output">Waiting for changes...</pre>
+        <pre id="event-output">Waiting for picker to load...</pre>
       </div>
     </div>
 
-    <div class="screen-preview">
+    <div class="screen-preview" id="screen-preview">
       <h2>Screen Preview</h2>
       <div class="screen">
         <div class="screen-content">
@@ -235,59 +275,11 @@
 
   <script src="../dist/trmnl-picker.min.js"></script>
   <script>
-    // Sample data (simulating API responses)
-    const models = [
-      {
-        name: 'trmnl_original',
-        label: 'TRMNL Original',
-        description: 'Original TRMNL model',
-        width: 800,
-        height: 480,
-        colors: 2,
-        bit_depth: 1,
-        scale_factor: 1.0,
-        rotation: 90,
-        mime_type: 'image/png',
-        offset_x: 10,
-        offset_y: 20,
-        published_at: '2023-10-01T12:00:00Z',
-        kind: 'trmnl',
-        size: '2.9',
-        palette_ids: ['bw', '4c', '7c']
-      },
-      {
-        name: 'og_plus',
-        label: 'TRMNL OG+',
-        description: 'OG Plus model',
-        width: 296,
-        height: 128,
-        size: '2.9',
-        palette_ids: ['bw', '4c']
-      },
-      {
-        name: 'pro',
-        label: 'TRMNL Pro',
-        description: 'Pro model with full color',
-        width: 800,
-        height: 480,
-        size: '7.3',
-        palette_ids: ['7c', 'bw']
-      }
-    ]
-
-    const palettes = [
-      { id: 'bw', name: 'Black & White', framework_class: 'palette-bw' },
-      { id: '4c', name: '4-Color', framework_class: 'palette-4c' },
-      { id: '7c', name: '7-Color', framework_class: 'palette-7c' }
-    ]
-
-    // Initialize picker
-    const picker = new TRMNLPicker('picker-form', { models, palettes })
-
-    // Track events
+    let picker = null
     let eventCount = 0
 
-    // Listen for changes
+    // Listen for changes (including initial state)
+    // Attach listener BEFORE creating picker to catch initial event
     document.getElementById('picker-form').addEventListener('changed', (event) => {
       eventCount++
       document.getElementById('event-count').textContent = `${eventCount} event${eventCount !== 1 ? 's' : ''}`
@@ -319,19 +311,42 @@
       console.log('Picker changed:', event.detail)
     })
 
-    // Example: Programmatic update after 3 seconds
-    setTimeout(() => {
-      console.log('Programmatically updating picker...')
-      picker.update({
-        modelName: 'pro',
-        paletteId: '7c',
-        isPortrait: false,
-        isDarkMode: false
-      })
-    }, 3000)
+    // Initialize picker
+    async function initPicker() {
+      try {
+        // Create picker with localStorage persistence
+        picker = await TRMNLPicker.create('picker-form', {
+          localStorageKey: 'trmnl-picker-demo'
+        })
 
-    // Display current state in console
-    console.log('Initial state:', picker.getState())
+        // Hide loading state, show form
+        document.getElementById('loading-state').style.display = 'none'
+        document.getElementById('picker-form').style.display = 'flex'
+        document.getElementById('screen-preview').classList.add('visible')
+        document.getElementById('status-badge').textContent = 'Ready'
+        document.getElementById('status-badge').classList.remove('loading')
+        document.getElementById('status-badge').classList.add('success')
+
+        console.log('✓ Picker initialized successfully')
+        console.log('Models:', picker.models.length)
+        console.log('Palettes:', picker.palettes.length)
+
+      } catch (error) {
+        console.error('Failed to initialize picker:', error)
+        document.getElementById('loading-state').innerHTML = `
+          <div style="color: #ff4d4f;">
+            <strong>Error loading picker:</strong><br>
+            ${error.message}
+          </div>
+        `
+        document.getElementById('status-badge').textContent = 'Error'
+        document.getElementById('status-badge').classList.remove('loading')
+        document.getElementById('status-badge').style.background = '#ff4d4f'
+      }
+    }
+
+    // Initialize on page load
+    initPicker()
   </script>
 </body>
 </html>
