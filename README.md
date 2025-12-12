@@ -8,6 +8,7 @@ A lightweight, framework-agnostic JavaScript library for managing TRMNL device m
 - Vanilla JavaScript (ES6+)
 - Event-driven architecture
 - Support for both NPM and browser usage
+- **Automatic API data fetching** - optionally fetches models and palettes from TRMNL API
 - Minimal API surface
 - TypeScript-friendly
 
@@ -59,49 +60,71 @@ The library expects a form with specific element IDs:
 
 ### 2. Initialize Picker
 
-#### Browser Usage
-```html
-<script src="dist/trmnl-picker.min.js"></script>
-<script>
-  // Get data from your API or define locally
-  const models = [
-    {
-      name: 'trmnl_original',
-      label: 'TRMNL Original',
-      size: '2.9',
-      width: 800,
-      height: 480,
-      palette_ids: ['bw', '4c', '7c']
-    }
-  ]
+You have two options: provide your own data, or let the library fetch from the TRMNL API automatically.
 
-  const palettes = [
-    { id: 'bw', name: 'Black & White', framework_class: 'palette-bw' },
-    { id: '4c', name: '4-Color', framework_class: 'palette-4c' },
-    { id: '7c', name: '7-Color', framework_class: 'palette-7c' }
-  ]
+#### Option A: Automatic API Fetching (Recommended)
 
-  // Initialize (TRMNLPicker is available globally)
-  const picker = new TRMNLPicker('picker-form', models, palettes)
-</script>
+The library can automatically fetch models and palettes from the TRMNL API:
+
+```javascript
+// Browser usage
+const picker = await TRMNLPicker.create('picker-form')
+
+// NPM module usage
+import TRMNLPicker from '@trmnl/picker'
+const picker = await TRMNLPicker.create('picker-form')
 ```
 
-#### NPM Module Usage
-```javascript
-import TRMNLPicker from '@trmnl/picker'
+This fetches data from:
+- `https://usetrmnl.com/api/models`
+- `https://usetrmnl.com/api/palettes`
 
-// Fetch data from API
-const modelsResponse = await fetch('/api/models')
-const modelsData = await modelsResponse.json()
-const models = modelsData.data // Adjust based on your API response structure
+#### Option B: Provide Your Own Data
+
+If you already have the data or need to customize it:
+
+```javascript
+// Browser usage
+const models = [
+  {
+    name: 'trmnl_original',
+    label: 'TRMNL Original',
+    size: '2.9',
+    width: 800,
+    height: 480,
+    palette_ids: ['bw', '4c', '7c']
+  }
+]
 
 const palettes = [
   { id: 'bw', name: 'Black & White', framework_class: 'palette-bw' },
-  { id: '4c', name: '4-Color', framework_class: 'palette-4c' }
+  { id: '4c', name: '4-Color', framework_class: 'palette-4c' },
+  { id: '7c', name: '7-Color', framework_class: 'palette-7c' }
 ]
 
-// Initialize
-const picker = new TRMNLPicker('picker-form', models, palettes)
+const picker = new TRMNLPicker('picker-form', { models, palettes })
+```
+
+```javascript
+// NPM module usage
+import TRMNLPicker from '@trmnl/picker'
+
+const models = await fetch('/api/models').then(r => r.json())
+const palettes = await fetch('/api/palettes').then(r => r.json())
+
+const picker = new TRMNLPicker('picker-form', { models, palettes })
+```
+
+#### Option C: Mix and Match
+
+You can provide one and fetch the other:
+
+```javascript
+// Provide models, fetch palettes
+const picker = await TRMNLPicker.create('picker-form', { models })
+
+// Fetch models, provide palettes
+const picker = await TRMNLPicker.create('picker-form', { palettes })
 ```
 
 ### 3. Listen for Changes
@@ -127,17 +150,52 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
 
 ## API Reference
 
+### Static Methods
+
+#### `TRMNLPicker.create(formId, options)`
+
+Create a picker instance with automatic API data fetching (async).
+
+```javascript
+// Fetch both models and palettes from TRMNL API
+const picker = await TRMNLPicker.create('picker-form')
+
+// Provide models, fetch palettes
+const picker = await TRMNLPicker.create('picker-form', { models })
+
+// Fetch models, provide palettes
+const picker = await TRMNLPicker.create('picker-form', { palettes })
+
+// Provide both (same as using constructor)
+const picker = await TRMNLPicker.create('picker-form', { models, palettes })
+```
+
+**Parameters:**
+- `formId` (string, required): ID of the form element
+- `options` (object, optional): Configuration options
+  - `options.models` (array, optional): Array of model objects. If not provided, fetches from `https://usetrmnl.com/api/models`
+  - `options.palettes` (array, optional): Array of palette objects. If not provided, fetches from `https://usetrmnl.com/api/palettes`
+
+**Returns:** `Promise<TRMNLPicker>` - Promise that resolves to the picker instance
+
+**Throws:** Error if API fetch fails or data is invalid
+
 ### Constructor
 
 ```javascript
-new TRMNLPicker(formId, models, palettes)
+new TRMNLPicker(formId, options)
 ```
+
+Direct constructor for synchronous initialization with data already available.
 
 **Parameters:**
 
 - `formId` (string, required): ID of the form element containing picker controls
-- `models` (array, required): Array of model objects from the `/api/models` endpoint
-- `palettes` (array, required): Array of palette objects
+- `options` (object, optional): Configuration options
+  - `options.models` (array, optional): Array of model objects from the `/api/models` endpoint
+  - `options.palettes` (array, optional): Array of palette objects
+
+**Note:** If models and palettes are not provided to the constructor, the picker will be created but not initialized. Use `TRMNLPicker.create()` instead for automatic data fetching.
 
 **Model Object Structure:**
 ```javascript

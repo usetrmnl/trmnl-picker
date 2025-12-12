@@ -3,22 +3,60 @@
  *
  * @class TRMNLPicker
  * @param {string} formId - ID of the form element containing picker controls
- * @param {Array<Object>} models - Array of model objects from API
- * @param {Array<Object>} palettes - Array of palette objects
+ * @param {Object} options - Configuration options
+ * @param {Array<Object>} options.models - Optional array of model objects from API
+ * @param {Array<Object>} options.palettes - Optional array of palette objects
  */
 class TRMNLPicker {
-  constructor(formId, models, palettes) {
+  static API_BASE_URL = 'https://usetrmnl.com'
+
+  /**
+   * Create a TRMNLPicker instance, fetching data from TRMNL API if not provided
+   * @static
+   * @param {string} formId - ID of the form element
+   * @param {Object} options - Configuration options
+   * @param {Array<Object>} options.models - Optional models array
+   * @param {Array<Object>} options.palettes - Optional palettes array
+   * @returns {Promise<TRMNLPicker>} Promise resolving to picker instance
+   */
+  static async create(formId, options = {}) {
+    let { models, palettes } = options
+
+    // Fetch models if not provided
+    if (!models) {
+      try {
+        const response = await fetch(`${TRMNLPicker.API_BASE_URL}/api/models`)
+        if (!response.ok) {
+          throw new Error(`Failed to fetch models: ${response.status} ${response.statusText}`)
+        }
+        const data = await response.json()
+        models = data.data || data
+      } catch (error) {
+        throw new Error(`TRMNLPicker: Failed to fetch models from API: ${error.message}`)
+      }
+    }
+
+    // Fetch palettes if not provided
+    if (!palettes) {
+      try {
+        const response = await fetch(`${TRMNLPicker.API_BASE_URL}/api/palettes`)
+        if (!response.ok) {
+          throw new Error(`Failed to fetch palettes: ${response.status} ${response.statusText}`)
+        }
+        const data = await response.json()
+        palettes = data.data || data
+      } catch (error) {
+        throw new Error(`TRMNLPicker: Failed to fetch palettes from API: ${error.message}`)
+      }
+    }
+
+    return new TRMNLPicker(formId, { models, palettes })
+  }
+
+  constructor(formId, options = {}) {
     // Validate inputs
     if (!formId || typeof formId !== 'string') {
       throw new Error('TRMNLPicker: formId must be a non-empty string')
-    }
-
-    if (!Array.isArray(models) || models.length === 0) {
-      throw new Error('TRMNLPicker: models must be a non-empty array')
-    }
-
-    if (!Array.isArray(palettes) || palettes.length === 0) {
-      throw new Error('TRMNLPicker: palettes must be a non-empty array')
     }
 
     // Store references
@@ -26,6 +64,8 @@ class TRMNLPicker {
     if (!this.formElement) {
       throw new Error(`TRMNLPicker: Form element with id "${formId}" not found`)
     }
+
+    const { models, palettes } = options
 
     this.models = models
     this.palettes = palettes
@@ -38,12 +78,23 @@ class TRMNLPicker {
       isDarkMode: false
     }
 
-    // Initialize DOM elements and bind events
-    this._initializeElements()
-    this._bindEvents()
+    // Only initialize if we have data
+    if (this.models && this.palettes) {
+      if (!Array.isArray(this.models) || this.models.length === 0) {
+        throw new Error('TRMNLPicker: models must be a non-empty array')
+      }
 
-    // Set initial state
-    this._setInitialState()
+      if (!Array.isArray(this.palettes) || this.palettes.length === 0) {
+        throw new Error('TRMNLPicker: palettes must be a non-empty array')
+      }
+
+      // Initialize DOM elements and bind events
+      this._initializeElements()
+      this._bindEvents()
+
+      // Set initial state
+      this._setInitialState()
+    }
   }
 
   /**
