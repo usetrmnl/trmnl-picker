@@ -520,7 +520,9 @@
 
       console.log('Picker changed:', event.detail)
 
-      terminalize();
+      document.addEventListener('DOMContentLoaded', () => {
+        terminalize();
+      })
     })
 
     // Initialize picker
