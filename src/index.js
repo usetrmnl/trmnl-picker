@@ -230,6 +230,9 @@ class TRMNLPicker {
 
     // Update UI
     this._updateResetButton()
+
+    // Emit initial changed event so consumers get the initial state
+    this._emitChangeEvent()
   }
 
   /**

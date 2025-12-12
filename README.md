@@ -312,7 +312,9 @@ picker.destroy()
 
 #### `changed` Event
 
-Emitted when user changes any selection (model, palette, orientation, or dark mode).
+Emitted when:
+- User changes any selection (model, palette, orientation, or dark mode)
+- **On initialization** - allows you to get the initial state immediately
 
 ```javascript
 document.getElementById('picker-form').addEventListener('changed', (event) => {
@@ -320,6 +322,8 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
   // Handle the change
 })
 ```
+
+**Important:** The event is emitted immediately after initialization, so you can apply initial screen classes without waiting for user interaction.
 
 **Event Detail Structure:**
 ```javascript
