@@ -4,6 +4,10 @@ A lightweight JavaScript library for managing TRMNL device model and palette sel
 
 This was extracted from our Core web app for [BYOS](https://docs.usetrmnl.com/go/diy/byos) (Bring Your Own Server) and other applications to take advantage of.
 
+## Live Demo
+
+Try the interactive demo: [https://usetrmnl.github.io/trmnl-picker/example/](https://usetrmnl.github.io/trmnl-picker/example/)
+
 ## Installation
 
 ### NPM
