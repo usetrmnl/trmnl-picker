@@ -159,17 +159,24 @@ class TRMNLPicker {
    * @private
    */
   _setInitialState() {
-    // Populate model select with all models
+    // Sort models alphabetically by label
+    const sortedModels = [...this.models].sort((a, b) => {
+      const labelA = (a.label || a.name).toLowerCase()
+      const labelB = (b.label || b.name).toLowerCase()
+      return labelA.localeCompare(labelB)
+    })
+
+    // Populate model select with sorted models
     this.elements.modelSelect.innerHTML = ''
-    this.models.forEach(model => {
+    sortedModels.forEach(model => {
       const option = document.createElement('option')
       option.value = model.name
       option.textContent = model.label || model.name
       this.elements.modelSelect.appendChild(option)
     })
 
-    // Set default model (first model or specific default)
-    const defaultModel = this.models[0]
+    // Set default model (first sorted model)
+    const defaultModel = sortedModels[0]
     this.elements.modelSelect.value = defaultModel.name
     this.state.selectedModel = defaultModel
 
