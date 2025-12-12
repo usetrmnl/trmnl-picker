@@ -223,9 +223,9 @@
     <p class="description">Fetching models and palettes directly from the TRMNL API</p>
 
     <div class="info-box">
-      <strong>API Usage:</strong> This example uses <code>TRMNLPicker.create(formId)</code> without providing models or palettes.
+      <strong>API Usage:</strong> This example uses <code>TRMNLPicker.create(formId, { localStorageKey: 'trmnl-picker-demo' })</code>.
       The library automatically fetches data from <code>https://usetrmnl.com/api/models</code> and
-      <code>https://usetrmnl.com/api/palettes</code>.
+      <code>https://usetrmnl.com/api/palettes</code>, and saves your selections to localStorage so they persist across page reloads.
     </div>
 
     <div class="picker-wrapper">
@@ -282,8 +282,10 @@
     // Initialize picker with API fetching
     async function initPicker() {
       try {
-        // Fetch data from TRMNL API and create picker
-        picker = await TRMNLPicker.create('picker-form')
+        // Fetch data from TRMNL API and create picker with localStorage persistence
+        picker = await TRMNLPicker.create('picker-form', {
+          localStorageKey: 'trmnl-picker-demo'
+        })
 
         // Hide loading state, show form
         document.getElementById('loading-state').style.display = 'none'

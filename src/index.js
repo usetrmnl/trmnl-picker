@@ -20,7 +20,7 @@ class TRMNLPicker {
    * @returns {Promise<TRMNLPicker>} Promise resolving to picker instance
    */
   static async create(formId, options = {}) {
-    let { models, palettes } = options
+    let { models, palettes, localStorageKey } = options
 
     // Fetch models if not provided
     if (!models) {
@@ -50,7 +50,7 @@ class TRMNLPicker {
       }
     }
 
-    return new TRMNLPicker(formId, { models, palettes })
+    return new TRMNLPicker(formId, { models, palettes, localStorageKey })
   }
 
   constructor(formId, options = {}) {
@@ -65,10 +65,11 @@ class TRMNLPicker {
       throw new Error(`TRMNLPicker: Form element with id "${formId}" not found`)
     }
 
-    const { models, palettes } = options
+    const { models, palettes, localStorageKey } = options
 
     this.models = models
     this.palettes = palettes
+    this.localStorageKey = localStorageKey
 
     // Initialize state
     this.state = {
@@ -92,7 +93,7 @@ class TRMNLPicker {
       this._initializeElements()
       this._bindEvents()
 
-      // Set initial state
+      // Set initial state (will load from localStorage if available)
       this._setInitialState()
     }
   }
@@ -175,23 +176,57 @@ class TRMNLPicker {
       this.elements.modelSelect.appendChild(option)
     })
 
-    // Set default model (prefer TRMNL OG variants, otherwise first sorted)
-    const defaultModel =
-      sortedModels.find(m => m.name === 'og' || (m.label && m.label.toLowerCase() === 'trmnl og')) ||
-      sortedModels.find(m => m.name === 'og_plus') ||
-      sortedModels.find(m => m.name === 'trmnl_original') ||
-      sortedModels[0]
+    // Load saved state from localStorage if available
+    const savedState = this._loadFromLocalStorage()
 
-    this.elements.modelSelect.value = defaultModel.name
-    this.state.selectedModel = defaultModel
+    // Set model (from localStorage or default)
+    let selectedModel = null
+    if (savedState && savedState.modelName) {
+      selectedModel = this.models.find(m => m.name === savedState.modelName)
+    }
+
+    if (!selectedModel) {
+      // Set default model (prefer TRMNL OG variants, otherwise first sorted)
+      selectedModel =
+        sortedModels.find(m => m.name === 'og' || (m.label && m.label.toLowerCase() === 'trmnl og')) ||
+        sortedModels.find(m => m.name === 'og_plus') ||
+        sortedModels.find(m => m.name === 'trmnl_original') ||
+        sortedModels[0]
+    }
+
+    this.elements.modelSelect.value = selectedModel.name
+    this.state.selectedModel = selectedModel
 
     // Populate palettes based on selected model
     this._populatePalettes()
 
-    // Set first palette as default
-    const firstPaletteId = defaultModel.palette_ids[0]
-    this.elements.paletteSelect.value = firstPaletteId
-    this.state.selectedPalette = this.palettes.find(p => p.id === firstPaletteId)
+    // Set palette (from localStorage or default)
+    let paletteId = null
+    if (savedState && savedState.paletteId && selectedModel.palette_ids.includes(savedState.paletteId)) {
+      paletteId = savedState.paletteId
+    } else {
+      paletteId = selectedModel.palette_ids[0]
+    }
+
+    this.elements.paletteSelect.value = paletteId
+    this.state.selectedPalette = this.palettes.find(p => p.id === paletteId)
+
+    // Set orientation and dark mode from localStorage
+    if (savedState) {
+      if (typeof savedState.isPortrait === 'boolean') {
+        this.state.isPortrait = savedState.isPortrait
+        if (this.elements.orientationText) {
+          this.elements.orientationText.textContent = this.state.isPortrait ? 'Portrait' : 'Landscape'
+        }
+      }
+
+      if (typeof savedState.isDarkMode === 'boolean') {
+        this.state.isDarkMode = savedState.isDarkMode
+        if (this.elements.darkModeText) {
+          this.elements.darkModeText.textContent = this.state.isDarkMode ? 'Dark Mode' : 'Light Mode'
+        }
+      }
+    }
 
     // Update UI
     this._updateResetButton()
@@ -272,6 +307,9 @@ class TRMNLPicker {
     const model = this.state.selectedModel
     const palette = this.state.selectedPalette
 
+    // Save to localStorage if key is configured
+    this._saveToLocalStorage()
+
     const event = new CustomEvent('changed', {
       detail: {
         screenClasses: this._calculateScreenClasses(),
@@ -296,6 +334,47 @@ class TRMNLPicker {
     })
 
     this.formElement.dispatchEvent(event)
+  }
+
+  /**
+   * Load state from localStorage
+   * @private
+   * @returns {Object|null} Saved state or null if not available
+   */
+  _loadFromLocalStorage() {
+    if (!this.localStorageKey) return null
+
+    try {
+      const saved = localStorage.getItem(this.localStorageKey)
+      if (saved) {
+        return JSON.parse(saved)
+      }
+    } catch (error) {
+      console.warn('TRMNLPicker: Failed to load from localStorage:', error)
+    }
+
+    return null
+  }
+
+  /**
+   * Save current state to localStorage
+   * @private
+   */
+  _saveToLocalStorage() {
+    if (!this.localStorageKey) return
+
+    try {
+      const stateToSave = {
+        modelName: this.state.selectedModel?.name,
+        paletteId: this.state.selectedPalette?.id,
+        isPortrait: this.state.isPortrait,
+        isDarkMode: this.state.isDarkMode
+      }
+
+      localStorage.setItem(this.localStorageKey, JSON.stringify(stateToSave))
+    } catch (error) {
+      console.warn('TRMNLPicker: Failed to save to localStorage:', error)
+    }
   }
 
   /**

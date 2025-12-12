@@ -9,6 +9,7 @@ A lightweight, framework-agnostic JavaScript library for managing TRMNL device m
 - Event-driven architecture
 - Support for both NPM and browser usage
 - **Automatic API data fetching** - optionally fetches models and palettes from TRMNL API
+- **localStorage persistence** - optionally saves user selections across page reloads
 - Minimal API surface
 - TypeScript-friendly
 
@@ -127,6 +128,29 @@ const picker = await TRMNLPicker.create('picker-form', { models })
 const picker = await TRMNLPicker.create('picker-form', { palettes })
 ```
 
+#### Option D: With localStorage Persistence
+
+Save user selections across page reloads:
+
+```javascript
+// With API fetching and localStorage
+const picker = await TRMNLPicker.create('picker-form', {
+  localStorageKey: 'my-trmnl-picker-state'
+})
+
+// With your own data and localStorage
+const picker = new TRMNLPicker('picker-form', {
+  models,
+  palettes,
+  localStorageKey: 'my-trmnl-picker-state'
+})
+```
+
+The picker will automatically:
+- Load the last selected model, palette, orientation, and dark mode from localStorage on initialization
+- Save any changes to localStorage whenever the user makes a selection
+- Fall back to defaults (TRMNL OG model) if no saved state exists
+
 ### 3. Listen for Changes
 
 ```javascript
@@ -175,6 +199,7 @@ const picker = await TRMNLPicker.create('picker-form', { models, palettes })
 - `options` (object, optional): Configuration options
   - `options.models` (array, optional): Array of model objects. If not provided, fetches from `https://usetrmnl.com/api/models`
   - `options.palettes` (array, optional): Array of palette objects. If not provided, fetches from `https://usetrmnl.com/api/palettes`
+  - `options.localStorageKey` (string, optional): localStorage key for persisting picker state across page reloads
 
 **Returns:** `Promise<TRMNLPicker>` - Promise that resolves to the picker instance
 
@@ -194,6 +219,7 @@ Direct constructor for synchronous initialization with data already available.
 - `options` (object, optional): Configuration options
   - `options.models` (array, optional): Array of model objects from the `/api/models` endpoint
   - `options.palettes` (array, optional): Array of palette objects
+  - `options.localStorageKey` (string, optional): localStorage key for persisting picker state across page reloads
 
 **Note:** If models and palettes are not provided to the constructor, the picker will be created but not initialized. Use `TRMNLPicker.create()` instead for automatic data fetching.
 
