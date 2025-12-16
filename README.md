@@ -284,10 +284,6 @@ npm run build:browser    # IIFE browser bundle
 npm run build:browser:min # Minified browser bundle
 ```
 
-## License
-
-MIT
-
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request.
