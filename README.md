@@ -136,7 +136,7 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
   const { screenClasses, state } = event.detail
 
   console.log('Screen classes:', screenClasses)
-  // ['screen--1bit', 'screen--v2', 'screen--md', 'screen--landscape', 'screen--1x']
+  // ['screen--1bit', 'screen--v2', 'screen--md', 'screen--1x']
 
   console.log('State:', state)
   // { model: {...}, palette: {...}, isPortrait: false, isDarkMode: false }
@@ -278,7 +278,6 @@ const state = picker.getState()
     'screen--1bit',
     'screen--v2',
     'screen--md',
-    'screen--landscape',
     'screen--1x'
   ]
 }
@@ -316,7 +315,6 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
     'screen--1bit',
     'screen--v2',
     'screen--md',
-    'screen--landscape',
     'screen--1x'
   ],
   state: {
@@ -335,7 +333,7 @@ The library generates CSS classes in the following order:
 1. **Palette class**: From `palette.framework_class` (e.g., `screen--1bit`)
 2. **Model device class**: From `model.css.classes.device` (e.g., `screen--v2`)
 3. **Model size class**: From `model.css.classes.size` (e.g., `screen--md`)
-4. **Orientation**: `screen--portrait` or `screen--landscape` (UI state)
+4. **Orientation** (conditional): `screen--portrait` when in portrait mode (UI state). Landscape mode omits this class as it's the default.
 5. **Scale**: Always `screen--1x` (UI state)
 6. **Dark mode** (conditional): `screen--dark-mode` when enabled (UI state)
 

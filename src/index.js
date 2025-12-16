@@ -374,8 +374,10 @@ class TRMNLPicker {
       classes.push(model.css.classes.size)
     }
 
-    // 4. Orientation (UI state)
-    classes.push(`screen--${this.state.isPortrait ? 'portrait' : 'landscape'}`)
+    // 4. Orientation (UI state, only portrait - landscape is default)
+    if (this.state.isPortrait) {
+      classes.push('screen--portrait')
+    }
 
     // 5. Scale (UI state, always 1x)
     classes.push('screen--1x')
