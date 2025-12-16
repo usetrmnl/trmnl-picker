@@ -53,16 +53,22 @@ class TRMNLPicker {
     return new TRMNLPicker(formId, { models, palettes, localStorageKey })
   }
 
-  constructor(formId, options = {}) {
+  constructor(formIdOrElement, options = {}) {
     // Validate inputs
-    if (!formId || typeof formId !== 'string') {
-      throw new Error('TRMNLPicker: formId must be a non-empty string')
+    if (!formIdOrElement) {
+      throw new Error('TRMNLPicker: formIdOrElement is required')
     }
 
-    // Store references
-    this.formElement = document.getElementById(formId)
-    if (!this.formElement) {
-      throw new Error(`TRMNLPicker: Form element with id "${formId}" not found`)
+    // Store references - accept either string ID or DOM element
+    if (typeof formIdOrElement === 'string') {
+      this.formElement = document.getElementById(formIdOrElement)
+      if (!this.formElement) {
+        throw new Error(`TRMNLPicker: Form element with id "${formIdOrElement}" not found`)
+      }
+    } else if (formIdOrElement instanceof Element) {
+      this.formElement = formIdOrElement
+    } else {
+      throw new Error('TRMNLPicker: formIdOrElement must be a string ID or DOM element')
     }
 
     const { models, palettes, localStorageKey } = options

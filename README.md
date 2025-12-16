@@ -117,18 +117,22 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
 
 ### Static Constructor Method
 
-#### `TRMNLPicker.create(formId, options)`
+#### `TRMNLPicker.create(formIdOrElement, options)`
 
 ```javascript
 // Fetch both models and palettes from TRMNL API
 const picker = await TRMNLPicker.create('picker-form')
+
+// Or pass a DOM element directly
+const formElement = document.getElementById('picker-form')
+const picker = await TRMNLPicker.create(formElement)
 
 // Or provide custom data
 const picker = await TRMNLPicker.create('picker-form', { models, palettes })
 ```
 
 **Parameters:**
-- `formId` (string, required): ID of the form element
+- `formIdOrElement` (string | Element, required): Form element ID or DOM element itself
 - `options` (object, optional): Configuration options
   - `options.models` (array, optional): Array of model objects. If not provided, fetches from `https://usetrmnl.com/api/models`
     - See the [TRMNL API docs](https://usetrmnl.com/api-docs/index.html) for model object schema 
