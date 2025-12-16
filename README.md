@@ -56,18 +56,13 @@ The library expects a form with specific element IDs. Apply your favorite CSS st
 
 ### 2. Initialize Picker
 
-You have two options: provide your own data, or let the library fetch from the TRMNL API automatically.
+You have two options: let the library fetch from the TRMNL API automatically, or provide your own data.
 
 #### Option A: Automatic API Fetching (Recommended)
 
 The library can automatically fetch models and palettes from the TRMNL API:
 
 ```javascript
-// Browser usage
-const picker = await TRMNLPicker.create('picker-form')
-
-// NPM module usage
-import TRMNLPicker from '@trmnl/picker'
 const picker = await TRMNLPicker.create('picker-form')
 ```
 
@@ -80,37 +75,13 @@ See https://usetrmnl.com/api-docs/ for complete API documentation.
 
 #### Option B: Provide Your Own Data
 
-If you already have the data or need to customize it:
+If you already have the data, or need to customize it, you can pass `models` and/or `palettes` as options to the constructor:
 
 ```javascript
-// Browser usage
-const models = [
-  {
-    name: 'og_plus',
-    label: 'TRMNL OG (2-bit)',
-    size: 'md',
-    width: 800,
-    height: 480,
-    palette_ids: ['bw', 'gray-4']
-  }
-]
+const models = [...]
+const palettes = [...]
 
-const palettes = [
-  { id: 'bw', name: 'Black & White', framework_class: 'screen--1bit' },
-  { id: 'gray-4', name: '4 Grays (2-bit)', framework_class: 'screen--2bit' },
-]
-
-const picker = new TRMNLPicker('picker-form', { models, palettes })
-```
-
-```javascript
-// NPM module usage
-import TRMNLPicker from '@trmnl/picker'
-
-const models = await fetch('/api/models').then(r => r.json())
-const palettes = await fetch('/api/palettes').then(r => r.json())
-
-const picker = new TRMNLPicker('picker-form', { models, palettes })
+const picker = await TRMNLPicker.create('picker-form', { models, palettes })
 ```
 
 #### With localStorage Persistence
@@ -135,40 +106,24 @@ The picker will automatically:
 document.getElementById('picker-form').addEventListener('changed', (event) => {
   const { screenClasses, state } = event.detail
 
-  console.log('Screen classes:', screenClasses)
-  // ['screen', 'screen--1bit', 'screen--v2', 'screen--md', 'screen--1x']
-
-  console.log('State:', state)
-  // { model: {...}, palette: {...}, isPortrait: false, isDarkMode: false }
-
-  // Apply classes to your screen elements
   document.querySelectorAll('.screen').forEach(screen => {
-    const filtered = screen.className.split(' ')
-      .filter(c => !c.startsWith('screen--') || c.startsWith('screen--scale-'))
-    screen.className = [...filtered, ...screenClasses].join(' ')
+    screen.className = screenClasses.join(' ')
+    executeTerminalize() // if Framework plugins.js has been included
   })
 })
 ```
 
 ## API Reference
 
-### Static Methods
+### Static Constructor Method
 
 #### `TRMNLPicker.create(formId, options)`
-
-Create a picker instance with automatic API data fetching (async).
 
 ```javascript
 // Fetch both models and palettes from TRMNL API
 const picker = await TRMNLPicker.create('picker-form')
 
-// Provide models, fetch palettes
-const picker = await TRMNLPicker.create('picker-form', { models })
-
-// Fetch models, provide palettes
-const picker = await TRMNLPicker.create('picker-form', { palettes })
-
-// Provide both (same as using constructor)
+// Or provide custom data
 const picker = await TRMNLPicker.create('picker-form', { models, palettes })
 ```
 
@@ -176,57 +131,14 @@ const picker = await TRMNLPicker.create('picker-form', { models, palettes })
 - `formId` (string, required): ID of the form element
 - `options` (object, optional): Configuration options
   - `options.models` (array, optional): Array of model objects. If not provided, fetches from `https://usetrmnl.com/api/models`
+    - See the [TRMNL API docs](https://usetrmnl.com/api-docs/index.html) for model object schema 
   - `options.palettes` (array, optional): Array of palette objects. If not provided, fetches from `https://usetrmnl.com/api/palettes`
+    - See the [TRMNL API docs](https://usetrmnl.com/api-docs/index.html) for palette object schema
   - `options.localStorageKey` (string, optional): localStorage key for persisting picker state across page reloads
 
 **Returns:** `Promise<TRMNLPicker>` - Promise that resolves to the picker instance
 
 **Throws:** Error if API fetch fails or data is invalid
-
-### Constructor
-
-```javascript
-new TRMNLPicker(formId, options)
-```
-
-Direct constructor for synchronous initialization with data already available.
-
-**Parameters:**
-
-- `formId` (string, required): ID of the form element containing picker controls
-- `options` (object, optional): Configuration options
-  - `options.models` (array, optional): Array of model objects from the `/api/models` endpoint
-  - `options.palettes` (array, optional): Array of palette objects
-  - `options.localStorageKey` (string, optional): localStorage key for persisting picker state across page reloads
-
-**Note:** If models and palettes are not provided to the constructor, the picker will be created but not initialized. Use `TRMNLPicker.create()` instead for automatic data fetching.
-
-**Model Object Structure:**
-```javascript
-{
-  name: 'trmnl_original',       // Unique identifier
-  label: 'TRMNL Original',      // Display name
-  width: 800,                   // Width in pixels
-  height: 480,                  // Height in pixels
-  palette_ids: ['bw', 'gray-4'], // Available palettes for this model
-  kind: 'trmnl',                // Device type ('trmnl' or other)
-  css: {                        // CSS framework classes (optional)
-    classes: {
-      device: 'screen--v2',     // Device-specific class
-      size: 'screen--md'        // Size-specific class
-    }
-  }
-}
-```
-
-**Palette Object Structure:**
-```javascript
-{
-  id: 'bw',                          // Palette identifier
-  name: 'Black & White',             // Display name
-  framework_class: 'screen--1bit'      // CSS class for styling (required)
-}
-```
 
 ### Methods
 
@@ -312,13 +224,7 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
 **Event Detail Structure:**
 ```javascript
 {
-  screenClasses: [
-    'screen',
-    'screen--1bit',
-    'screen--v2',
-    'screen--md',
-    'screen--1x'
-  ],
+  screenClasses: [...],
   state: {
     model: { name, label, width, height, kind, css: {...} },
     palette: { id, name, framework_class },
@@ -327,20 +233,6 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
   }
 }
 ```
-
-## Screen Class Generation
-
-The library generates CSS classes in the following order:
-
-0. **Base class**: Always `screen`
-1. **Palette class**: From `palette.framework_class` (e.g., `screen--1bit`)
-2. **Model device class**: From `model.css.classes.device` (e.g., `screen--v2`)
-3. **Model size class**: From `model.css.classes.size` (e.g., `screen--md`)
-4. **Orientation** (conditional): `screen--portrait` when in portrait mode (UI state). Landscape mode omits this class as it's the default.
-5. **Scale**: Always `screen--1x` (UI state)
-6. **Dark mode** (conditional): `screen--dark-mode` when enabled (UI state)
-
-**Note:** Device and size classes are provided by the TRMNL API. Orientation, scale, and dark mode classes are generated based on picker UI state.
 
 ## Form Elements
 
@@ -359,8 +251,6 @@ The library expects the following elements within the form:
 
 ## Examples
 
-### Complete Working Example
-
 See [example/index.html](example/index.html) for a complete working example with styling.
 
 ### Applying Classes to Screen Elements
@@ -371,71 +261,10 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
 
   // Apply to all elements with class 'screen'
   document.querySelectorAll('.screen').forEach(screen => {
-    // Remove old screen-- classes (except scale and no-bleed)
-    const currentClasses = screen.className.split(' ')
-    const filteredClasses = currentClasses.filter(c => {
-      if (!c.startsWith('screen--')) return true
-      if (c.startsWith('screen--scale-')) return true
-      if (c === 'screen--no-bleed') return true
-      return false
-    })
-
-    // Add new screen classes
-    filteredClasses.push(...screenClasses)
-    screen.className = filteredClasses.join(' ')
+    screen.className = screenClasses.join(' ')
   })
 })
 ```
-
-### Using with React
-
-```jsx
-import { useEffect, useRef } from 'react'
-import TRMNLPicker from '@trmnl/picker'
-
-function ScreenPicker({ models, palettes, onChange }) {
-  const pickerRef = useRef(null)
-
-  useEffect(() => {
-    const picker = new TRMNLPicker('picker-form', models, palettes)
-
-    const handleChange = (event) => {
-      onChange(event.detail)
-    }
-
-    document.getElementById('picker-form').addEventListener('changed', handleChange)
-
-    pickerRef.current = picker
-
-    return () => {
-      picker.destroy()
-      document.getElementById('picker-form').removeEventListener('changed', handleChange)
-    }
-  }, [models, palettes, onChange])
-
-  return (
-    <form id="picker-form">
-      <select id="model-select"></select>
-      <select id="palette-select"></select>
-      <button type="button" id="orientation-toggle">
-        <span data-orientation-text>Landscape</span>
-      </button>
-      <button type="button" id="dark-mode-toggle">
-        <span data-dark-mode-text>Light Mode</span>
-      </button>
-      <button type="button" id="reset-button">Reset</button>
-    </form>
-  )
-}
-```
-
-## Browser Support
-
-- Modern browsers with ES6+ support
-- Chrome 51+
-- Firefox 54+
-- Safari 10+
-- Edge 15+
 
 ## Development
 
@@ -465,4 +294,4 @@ Contributions are welcome! Please open an issue or submit a pull request.
 
 ## Support
 
-For issues and questions, please use the [GitHub issue tracker](https://github.com/trmnl/trmnl-picker/issues).
+For issues and questions, please use the [GitHub issue tracker](https://github.com/usetrmnl/trmnl-picker/issues).
