@@ -315,7 +315,7 @@ class TRMNLPicker {
     // Update UI
     this._updateResetButton()
 
-    // Emit initial changed event so consumers get the initial state
+    // Emit initial changed event so consumers get the initial state (wait for DOM to load)
     this._emitChangeEvent()
   }
 
@@ -358,6 +358,9 @@ class TRMNLPicker {
     }
 
     const classes = []
+
+    // 0. Base screen class (always present)
+    classes.push('screen')
 
     // 1. Palette framework class
     if (palette && palette.framework_class) {

@@ -136,7 +136,7 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
   const { screenClasses, state } = event.detail
 
   console.log('Screen classes:', screenClasses)
-  // ['screen--1bit', 'screen--v2', 'screen--md', 'screen--1x']
+  // ['screen', 'screen--1bit', 'screen--v2', 'screen--md', 'screen--1x']
 
   console.log('State:', state)
   // { model: {...}, palette: {...}, isPortrait: false, isDarkMode: false }
@@ -275,6 +275,7 @@ const state = picker.getState()
   isPortrait: false,
   isDarkMode: false,
   screenClasses: [
+    'screen',
     'screen--1bit',
     'screen--v2',
     'screen--md',
@@ -312,6 +313,7 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
 ```javascript
 {
   screenClasses: [
+    'screen',
     'screen--1bit',
     'screen--v2',
     'screen--md',
@@ -330,6 +332,7 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
 
 The library generates CSS classes in the following order:
 
+0. **Base class**: Always `screen`
 1. **Palette class**: From `palette.framework_class` (e.g., `screen--1bit`)
 2. **Model device class**: From `model.css.classes.device` (e.g., `screen--v2`)
 3. **Model size class**: From `model.css.classes.size` (e.g., `screen--md`)

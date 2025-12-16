@@ -51,7 +51,7 @@
     </div>
 
     <div class="screen-preview trmnl" id="screen-preview">
-      <div class="screen screen--2bit screen--og_plus screen--md screen--landscape screen--1x">
+      <div class="screen">
         <div class="view view--full">
           <div class="layout layout--col gap--space-between">
             <div class="grid grid--cols-2">
@@ -504,25 +504,11 @@
 
       // Apply classes to screen preview
       const screen = document.querySelector('.screen')
-      const currentClasses = screen.className.split(' ')
-
-      // Remove old screen classes
-      const filteredClasses = currentClasses.filter(c => {
-        if (!c.startsWith('screen--')) return true
-        if (c.startsWith('screen--scale-')) return true
-        if (c === 'screen--no-bleed') return true
-        return false
-      })
-
-      // Add new screen classes
-      filteredClasses.push(...screenClasses)
-      screen.className = filteredClasses.join(' ')
+      screen.className = screenClasses.join(' ')
 
       console.log('Picker changed:', event.detail)
 
-      document.addEventListener('DOMContentLoaded', () => {
-        terminalize();
-      })
+      executeTerminalize()
     })
 
     // Initialize picker
