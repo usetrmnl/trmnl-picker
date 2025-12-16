@@ -364,21 +364,23 @@ class TRMNLPicker {
       classes.push(palette.framework_class)
     }
 
-    // 2. Model name
-    classes.push(`screen--${model.name}`)
-
-    // 3. Model size
-    if (model.size) {
-      classes.push(`screen--${model.size}`)
+    // 2. Model device class (from API)
+    if (model.css && model.css.classes && model.css.classes.device) {
+      classes.push(model.css.classes.device)
     }
 
-    // 4. Orientation
+    // 3. Model size class (from API)
+    if (model.css && model.css.classes && model.css.classes.size) {
+      classes.push(model.css.classes.size)
+    }
+
+    // 4. Orientation (UI state)
     classes.push(`screen--${this.state.isPortrait ? 'portrait' : 'landscape'}`)
 
-    // 5. Scale (always 1x)
+    // 5. Scale (UI state, always 1x)
     classes.push('screen--1x')
 
-    // 6. Dark mode (conditional)
+    // 6. Dark mode (UI state, conditional)
     if (this.state.isDarkMode) {
       classes.push('screen--dark-mode')
     }

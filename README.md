@@ -136,7 +136,7 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
   const { screenClasses, state } = event.detail
 
   console.log('Screen classes:', screenClasses)
-  // ['screen--1bit', 'screen--trmnl_original', 'screen--2.9', 'screen--landscape', 'screen--1x']
+  // ['screen--1bit', 'screen--v2', 'screen--md', 'screen--landscape', 'screen--1x']
 
   console.log('State:', state)
   // { model: {...}, palette: {...}, isPortrait: false, isDarkMode: false }
@@ -206,10 +206,16 @@ Direct constructor for synchronous initialization with data already available.
 {
   name: 'trmnl_original',       // Unique identifier
   label: 'TRMNL Original',      // Display name
-  size: 'md',                   // Screen size class
   width: 800,                   // Width in pixels
   height: 480,                  // Height in pixels
-  palette_ids: ['bw', 'gray-4'] // Available palettes for this model
+  palette_ids: ['bw', 'gray-4'], // Available palettes for this model
+  kind: 'trmnl',                // Device type ('trmnl' or other)
+  css: {                        // CSS framework classes (optional)
+    classes: {
+      device: 'screen--v2',     // Device-specific class
+      size: 'screen--md'        // Size-specific class
+    }
+  }
 }
 ```
 
@@ -270,8 +276,8 @@ const state = picker.getState()
   isDarkMode: false,
   screenClasses: [
     'screen--1bit',
-    'screen--trmnl_original',
-    'screen--2.9',
+    'screen--v2',
+    'screen--md',
     'screen--landscape',
     'screen--1x'
   ]
@@ -308,13 +314,13 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
 {
   screenClasses: [
     'screen--1bit',
-    'screen--trmnl_original',
-    'screen--2.9',
+    'screen--v2',
+    'screen--md',
     'screen--landscape',
     'screen--1x'
   ],
   state: {
-    model: { name, label, size, width, height },
+    model: { name, label, width, height, kind, css: {...} },
     palette: { id, name, framework_class },
     isPortrait: false,
     isDarkMode: false
@@ -327,11 +333,13 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
 The library generates CSS classes in the following order:
 
 1. **Palette class**: From `palette.framework_class` (e.g., `screen--1bit`)
-2. **Model name**: `screen--{model.name}` (e.g., `screen--trmnl_original`)
-3. **Model size**: `screen--{model.size}` (e.g., `screen--2.9`)
-4. **Orientation**: `screen--portrait` or `screen--landscape`
-5. **Scale**: Always `screen--1x`
-6. **Dark mode** (conditional): `screen--dark-mode` (when enabled)
+2. **Model device class**: From `model.css.classes.device` (e.g., `screen--v2`)
+3. **Model size class**: From `model.css.classes.size` (e.g., `screen--md`)
+4. **Orientation**: `screen--portrait` or `screen--landscape` (UI state)
+5. **Scale**: Always `screen--1x` (UI state)
+6. **Dark mode** (conditional): `screen--dark-mode` when enabled (UI state)
+
+**Note:** Device and size classes are provided by the TRMNL API. Orientation, scale, and dark mode classes are generated based on picker UI state.
 
 ## Form Elements
 
