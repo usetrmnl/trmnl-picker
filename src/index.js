@@ -698,6 +698,15 @@ class TRMNLPicker {
   }
 
   /**
+   * Get current screen classes
+   * @public
+   * @returns {Array<string>} Array of CSS class names
+   */
+  getScreenClasses() {
+    return this._calculateScreenClasses()
+  }
+
+  /**
    * Clean up event listeners and references
    * @public
    */

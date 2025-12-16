@@ -200,6 +200,17 @@ const state = picker.getState()
 }
 ```
 
+#### `getScreenClasses()`
+
+Get just the current screen classes array.
+
+```javascript
+const screenClasses = picker.getScreenClasses()
+// ['screen', 'screen--1bit', 'screen--v2', 'screen--md', 'screen--1x']
+```
+
+**Returns:** `Array<string>` - Array of CSS class names
+
 #### `destroy()`
 
 Clean up event listeners and references. Call this when removing the picker.
