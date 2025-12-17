@@ -494,17 +494,12 @@
     // Listen for changes (including initial state)
     // Attach listener BEFORE creating picker to catch initial event
     document.getElementById('picker-form').addEventListener('changed', (event) => {
-      const { screenClasses, state } = event.detail
-
       // Display event data
-      document.getElementById('event-output').textContent = JSON.stringify({
-        screenClasses,
-        state
-      }, null, 2)
+      document.getElementById('event-output').textContent = JSON.stringify(event.detail, null, 2)
 
       // Apply classes to screen preview
       const screen = document.querySelector('.screen')
-      screen.className = screenClasses.join(' ')
+      screen.className = event.detail.screenClasses.join(' ')
 
       console.log('Picker changed:', event.detail)
 

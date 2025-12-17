@@ -322,7 +322,7 @@ class TRMNLPicker {
     this._updateResetButton()
 
     // Emit initial changed event so consumers get the initial state (wait for DOM to load)
-    this._emitChangeEvent()
+    this._emitChangeEvent('initial')
   }
 
   /**
@@ -403,7 +403,7 @@ class TRMNLPicker {
    * Emit 'changed' event with current state and screen classes
    * @private
    */
-  _emitChangeEvent() {
+  _emitChangeEvent(source) {
     const model = this.state.selectedModel
     const palette = this.state.selectedPalette
 
@@ -412,6 +412,7 @@ class TRMNLPicker {
 
     const event = new CustomEvent('changed', {
       detail: {
+        source,
         screenClasses: this._calculateScreenClasses(),
         state: {
           model: model ? {
@@ -427,8 +428,8 @@ class TRMNLPicker {
             framework_class: palette.framework_class
           } : null,
           isPortrait: this.state.isPortrait,
-          isDarkMode: this.state.isDarkMode
-        }
+          isDarkMode: this.state.isDarkMode,
+        },
       },
       bubbles: true
     })
@@ -502,7 +503,7 @@ class TRMNLPicker {
     this._updateResetButton()
 
     // Emit change event
-    this._emitChangeEvent()
+    this._emitChangeEvent('form')
   }
 
   /**
@@ -519,7 +520,7 @@ class TRMNLPicker {
     this._updateResetButton()
 
     // Emit change event
-    this._emitChangeEvent()
+    this._emitChangeEvent('form')
   }
 
   /**
@@ -538,7 +539,7 @@ class TRMNLPicker {
     this._updateResetButton()
 
     // Emit change event
-    this._emitChangeEvent()
+    this._emitChangeEvent('form')
   }
 
   /**
@@ -557,7 +558,7 @@ class TRMNLPicker {
     this._updateResetButton()
 
     // Emit change event
-    this._emitChangeEvent()
+    this._emitChangeEvent('form')
   }
 
   /**
@@ -589,7 +590,7 @@ class TRMNLPicker {
     this._updateResetButton()
 
     // Emit change event
-    this._emitChangeEvent()
+    this._emitChangeEvent('form')
   }
 
   /**
@@ -678,7 +679,7 @@ class TRMNLPicker {
 
     if (changed) {
       this._updateResetButton()
-      this._emitChangeEvent()
+      this._emitChangeEvent('update')
     }
   }
 

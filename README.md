@@ -104,7 +104,7 @@ The picker will automatically:
 
 ```javascript
 document.getElementById('picker-form').addEventListener('changed', (event) => {
-  const { screenClasses, state } = event.detail
+  const { source, screenClasses, state } = event.detail
 
   document.querySelectorAll('.screen').forEach(screen => {
     screen.className = screenClasses.join(' ')
@@ -229,7 +229,7 @@ Emitted when:
 
 ```javascript
 document.getElementById('picker-form').addEventListener('changed', (event) => {
-  const { screenClasses, state } = event.detail
+  const { source, screenClasses, state } = event.detail
   // Handle the change
 })
 ```
@@ -239,6 +239,7 @@ document.getElementById('picker-form').addEventListener('changed', (event) => {
 **Event Detail Structure:**
 ```javascript
 {
+  source: 'initial' | 'form' | 'update',
   screenClasses: [...],
   state: {
     model: { name, label, width, height, kind, css: {...} },
