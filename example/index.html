@@ -493,7 +493,7 @@
 
     // Listen for changes (including initial state)
     // Attach listener BEFORE creating picker to catch initial event
-    document.getElementById('picker-form').addEventListener('changed', (event) => {
+    document.getElementById('picker-form').addEventListener('trmnl:changed', (event) => {
       // Display event data
       document.getElementById('event-output').textContent = JSON.stringify(event.detail, null, 2)
 

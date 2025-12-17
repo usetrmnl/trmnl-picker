@@ -103,7 +103,7 @@ The picker will automatically:
 ### 3. Listen for Changes
 
 ```javascript
-document.getElementById('picker-form').addEventListener('changed', (event) => {
+document.getElementById('picker-form').addEventListener('trmnl:changed', (event) => {
   const { source, screenClasses, state } = event.detail
 
   document.querySelectorAll('.screen').forEach(screen => {
@@ -221,14 +221,14 @@ picker.destroy()
 
 ### Events
 
-#### `changed` Event
+#### `trmnl:changed` Event
 
 Emitted when:
 - User changes any selection (model, palette, orientation, or dark mode)
 - **On initialization** - allows you to get the initial state immediately
 
 ```javascript
-document.getElementById('picker-form').addEventListener('changed', (event) => {
+document.getElementById('picker-form').addEventListener('trmnl:changed', (event) => {
   const { source, screenClasses, state } = event.detail
   // Handle the change
 })
@@ -272,7 +272,7 @@ See [example/index.html](example/index.html) for a complete working example with
 ### Applying Classes to Screen Elements
 
 ```javascript
-document.getElementById('picker-form').addEventListener('changed', (event) => {
+document.getElementById('picker-form').addEventListener('trmnl:changed', (event) => {
   const { screenClasses } = event.detail
 
   // Apply to all elements with class 'screen'

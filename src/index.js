@@ -400,7 +400,7 @@ class TRMNLPicker {
   }
 
   /**
-   * Emit 'changed' event with current state and screen classes
+   * Emit 'trmnl:changed' event with current state and screen classes
    * @private
    */
   _emitChangeEvent(source) {
@@ -410,7 +410,7 @@ class TRMNLPicker {
     // Save to localStorage if key is configured
     this._saveToLocalStorage()
 
-    const event = new CustomEvent('changed', {
+    const event = new CustomEvent('trmnl:changed', {
       detail: {
         source,
         screenClasses: this._calculateScreenClasses(),
