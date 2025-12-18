@@ -2,11 +2,17 @@
 
 A lightweight JavaScript library for managing TRMNL device model and palette selection.
 
-This was extracted from our Core web app so that [BYOS](https://docs.usetrmnl.com/go/diy/byos) (Bring Your Own Server) and other applications can take advantage of it.
+It's used by the core TRMNL web app, [trmnlp](https://github.com/usetrmnl/trmnlp), [BYOS (Bring Your Own Server)](https://docs.usetrmnl.com/go/diy/byos) applications, and anybody else who needs it.
+
+![Screenshot](example/screenshot.png)
 
 ## Live Demo
 
 Try the interactive demo at [https://usetrmnl.github.io/trmnl-picker/example/](https://usetrmnl.github.io/trmnl-picker/example/)
+
+## API Reference
+
+See the [API documentation](https://usetrmnl.github.io/trmnl-picker/doc/) for complete information.
 
 ## Installation
 
@@ -52,24 +58,20 @@ The library expects a form with specific data-* attributes. Apply your favorite 
   <!-- Optional: Reset button -->
   <button type="button" data-reset-button>Reset</button>
 </form>
+
+<!-- The screen element to be modified -->
+<div class="screen">
+  <div class="view view--full">
+    <!-- Your screen's content goes here -->
+  </div>
+</div>
 ```
 
 ### 2. Initialize Picker
 
 ```javascript
-const picker = await TRMNLPicker.create('picker-form')
-```
-
-Data is automatically fetched from the TRMNL API.
-
-#### With localStorage Persistence
-
-Save user selections across page reloads:
-
-```javascript
-// With API fetching and localStorage
 const picker = await TRMNLPicker.create('picker-form', {
-  localStorageKey: 'my-trmnl-picker-state'
+  localStorageKey: 'my-trmnl-picker-state' // optional: persist user selection in localStorage
 })
 ```
 
@@ -77,19 +79,14 @@ const picker = await TRMNLPicker.create('picker-form', {
 
 ```javascript
 document.getElementById('picker-form').addEventListener('trmnl:change', (event) => {
-  const { origin, screenClasses, model, palette } = event.detail
+  const { origin, screenClasses, model, palette, isDarkMode, isPortrait } = event.detail
 
   document.querySelectorAll('.screen').forEach(screen => {
     screen.className = screenClasses.join(' ')
-    executeTerminalize() // if Framework plugins.js has been included
+    executeTerminalize() // from Framework plugin.js
   })
 })
 ```
-
-## API Reference
-
-See the [API documentation](https://usetrmnl.github.io/trmnl-picker/doc/) for complete information.
-
 
 ## Development
 
@@ -107,6 +104,9 @@ npm run watch
 npm run build:esm        # ES module
 npm run build:browser    # IIFE browser bundle
 npm run build:browser:min # Minified browser bundle
+
+# Build docs
+npm run build:docs
 ```
 
 ## Contributing
