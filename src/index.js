@@ -176,16 +176,16 @@ class TRMNLPicker {
   }
 
   /**
-   * Find and store references to form elements
+   * Find and store references to form elements using data-* attributes
    * @private
    */
   _initializeElements() {
     this.elements = {
-      modelSelect: this.formElement.querySelector('#model-select'),
-      paletteSelect: this.formElement.querySelector('#palette-select'),
-      orientationToggle: this.formElement.querySelector('#orientation-toggle'),
-      darkModeToggle: this.formElement.querySelector('#dark-mode-toggle'),
-      resetButton: this.formElement.querySelector('#reset-button'),
+      modelSelect: this.formElement.querySelector('[data-model-select]'),
+      paletteSelect: this.formElement.querySelector('[data-palette-select]'),
+      orientationToggle: this.formElement.querySelector('[data-orientation-toggle]'),
+      darkModeToggle: this.formElement.querySelector('[data-dark-mode-toggle]'),
+      resetButton: this.formElement.querySelector('[data-reset-button]'),
 
       // Optional: UI indicator elements
       orientationText: this.formElement.querySelector('[data-orientation-text]'),

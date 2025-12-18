@@ -29,28 +29,28 @@ npm install @trmnl/picker
 
 ### 1. Create HTML Structure
 
-The library expects a form with specific element IDs. Apply your favorite CSS styling framework as desired.
+The library expects a form with specific data-* attributes. Apply your favorite CSS styling framework as desired.
 
 ```html
 <form id="picker-form">
   <!-- Required: Model selector -->
-  <select id="model-select"></select>
+  <select data-model-select></select>
 
   <!-- Required: Palette selector -->
-  <select id="palette-select"></select>
+  <select data-palette-select></select>
 
   <!-- Optional: Orientation toggle -->
-  <button type="button" id="orientation-toggle">
+  <button type="button" data-orientation-toggle>
     <span data-orientation-text>Landscape</span>
   </button>
 
   <!-- Optional: Dark mode toggle -->
-  <button type="button" id="dark-mode-toggle">
+  <button type="button" data-dark-mode-toggle>
     <span data-dark-mode-text>Light Mode</span>
   </button>
 
   <!-- Optional: Reset button -->
-  <button type="button" id="reset-button">Reset</button>
+  <button type="button" data-reset-button>Reset</button>
 </form>
 ```
 
@@ -255,16 +255,16 @@ document.getElementById('picker-form').addEventListener('trmnl:change', (event) 
 
 ## Form Elements
 
-The library expects the following elements within the form:
+The library expects the following elements within the form using data-* attributes:
 
 ### Required Elements
-- `#model-select` - Model dropdown
-- `#palette-select` - Palette dropdown
+- `[data-model-select]` - Model dropdown (typically a `<select>` element)
+- `[data-palette-select]` - Palette dropdown (typically a `<select>` element)
 
 ### Optional Elements
-- `#orientation-toggle` - Button to toggle portrait/landscape
-- `#dark-mode-toggle` - Button to toggle dark mode
-- `#reset-button` - Button to reset to defaults (first palette, landscape orientation, light mode)
+- `[data-orientation-toggle]` - Button to toggle portrait/landscape
+- `[data-dark-mode-toggle]` - Button to toggle dark mode
+- `[data-reset-button]` - Button to reset to defaults (first palette, landscape orientation, light mode)
 - `[data-orientation-text]` - Text element showing current orientation
 - `[data-dark-mode-text]` - Text element showing current mode
 
