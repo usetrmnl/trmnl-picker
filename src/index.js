@@ -1,3 +1,5 @@
+const DEFAULT_MODEL_NAME = 'og_plus'
+
 /**
  * TRMNLPicker - Vanilla JS library for TRMNL device and palette selection
  *
@@ -76,14 +78,6 @@ class TRMNLPicker {
     this.models = models
     this.palettes = palettes
     this.localStorageKey = localStorageKey
-
-    // Initialize state
-    this.state = {
-      selectedModel: null,
-      selectedPalette: null,
-      isPortrait: false,
-      isDarkMode: false
-    }
 
     // Only initialize if we have data
     if (this.models && this.palettes) {
@@ -182,7 +176,7 @@ class TRMNLPicker {
       paletteChange: this._handlePaletteChange.bind(this),
       orientationToggle: this._toggleOrientation.bind(this),
       darkModeToggle: this._toggleDarkMode.bind(this),
-      reset: this._resetToDefaults.bind(this)
+      reset: this._resetToModelDefaults.bind(this)
     }
 
     // Attach event listeners
@@ -256,80 +250,30 @@ class TRMNLPicker {
     // Keep combined sorted list for default selection logic
     const sortedModels = [...sortTRMNL, ...sortBYOD]
 
-    // Load saved state from localStorage if available
-    const savedState = this._loadFromLocalStorage()
+    // Initialize state
+    this._state = {}
 
-    // Set model (from localStorage or default)
-    let selectedModel = null
-    if (savedState && savedState.modelName) {
-      selectedModel = this.models.find(m => m.name === savedState.modelName)
+    const savedParams = this._loadFromLocalStorage()
+    if (savedParams) {
+      this._setParams('constructor', savedParams)
+    } else {
+      const defaultModel = sortedModels.find(m => m.name === DEFAULT_MODEL_NAME) || sortedModels[0]
+      const defaultPaletteId = this._getFirstValidPaletteId(defaultModel)
+
+      this._setParams('constructor', {
+        modelName: defaultModel.name,
+        paletteId: defaultPaletteId,
+        isPortrait: false,
+        isDarkMode: false
+      })
     }
-
-    if (!selectedModel) {
-      // Set default model (prefer TRMNL OG variants, otherwise first sorted)
-      selectedModel =
-        sortedModels.find(m => m.name === 'og' || (m.label && m.label.toLowerCase() === 'trmnl og')) ||
-        sortedModels.find(m => m.name === 'og_plus') ||
-        sortedModels.find(m => m.name === 'trmnl_original') ||
-        sortedModels[0]
-    }
-
-    this.elements.modelSelect.value = selectedModel.name
-    this.state.selectedModel = selectedModel
-
-    // Populate palettes based on selected model
-    this._populatePalettes()
-
-    // Set palette (from localStorage or default)
-    let paletteId = null
-    if (savedState && savedState.paletteId) {
-      // Check if saved palette is valid (has framework_class) and is in this model's palettes
-      const savedPalette = this.palettes.find(p => p.id === savedState.paletteId)
-      if (savedPalette &&
-          savedPalette.framework_class &&
-          savedPalette.framework_class.trim() !== '' &&
-          selectedModel.palette_ids.includes(savedState.paletteId)) {
-        paletteId = savedState.paletteId
-      }
-    }
-
-    if (!paletteId) {
-      // Get first valid palette (one with non-empty framework_class)
-      paletteId = this._getFirstValidPaletteId(selectedModel)
-    }
-
-    this.elements.paletteSelect.value = paletteId
-    this.state.selectedPalette = this.palettes.find(p => p.id === paletteId)
-
-    // Set orientation and dark mode from localStorage
-    if (savedState) {
-      if (typeof savedState.isPortrait === 'boolean') {
-        this.state.isPortrait = savedState.isPortrait
-        if (this.elements.orientationText) {
-          this.elements.orientationText.textContent = this.state.isPortrait ? 'Portrait' : 'Landscape'
-        }
-      }
-
-      if (typeof savedState.isDarkMode === 'boolean') {
-        this.state.isDarkMode = savedState.isDarkMode
-        if (this.elements.darkModeText) {
-          this.elements.darkModeText.textContent = this.state.isDarkMode ? 'Dark Mode' : 'Light Mode'
-        }
-      }
-    }
-
-    // Update UI
-    this._updateResetButton()
-
-    // Emit initial changed event so consumers get the initial state (wait for DOM to load)
-    this._emitChangeEvent('initial')
   }
 
   /**
    * Populate palette dropdown based on selected model
    * @private
    */
-  _populatePalettes() {
+  _populateModelPalettes() {
     const modelName = this.elements.modelSelect.value
     const model = this.models.find(m => m.name === modelName)
 
@@ -351,85 +295,18 @@ class TRMNLPicker {
   }
 
   /**
-   * Calculate screen classes based on current state
-   * @private
-   * @returns {Array<string>} Array of CSS class names
-   */
-  _calculateScreenClasses() {
-    const model = this.state.selectedModel
-    const palette = this.state.selectedPalette
-
-    if (!model) {
-      throw new Error('No model selected')
-    }
-
-    const classes = []
-
-    // 0. Base screen class (always present)
-    classes.push('screen')
-
-    // 1. Palette framework class
-    if (palette && palette.framework_class) {
-      classes.push(palette.framework_class)
-    }
-
-    // 2. Model device class (from API)
-    if (model.css && model.css.classes && model.css.classes.device) {
-      classes.push(model.css.classes.device)
-    }
-
-    // 3. Model size class (from API)
-    if (model.css && model.css.classes && model.css.classes.size) {
-      classes.push(model.css.classes.size)
-    }
-
-    // 4. Orientation (UI state, only portrait - landscape is default)
-    if (this.state.isPortrait) {
-      classes.push('screen--portrait')
-    }
-
-    // 5. Scale (UI state, always 1x)
-    classes.push('screen--1x')
-
-    // 6. Dark mode (UI state, conditional)
-    if (this.state.isDarkMode) {
-      classes.push('screen--dark-mode')
-    }
-
-    return classes
-  }
-
-  /**
-   * Emit 'trmnl:changed' event with current state and screen classes
+   * Emit 'trmnl:change' event with current state and screen classes
    * @private
    */
-  _emitChangeEvent(source) {
-    const model = this.state.selectedModel
-    const palette = this.state.selectedPalette
-
+  _emitChangeEvent(origin) {
     // Save to localStorage if key is configured
     this._saveToLocalStorage()
 
-    const event = new CustomEvent('trmnl:changed', {
+    const event = new CustomEvent('trmnl:change', {
       detail: {
-        source,
-        screenClasses: this._calculateScreenClasses(),
-        state: {
-          model: model ? {
-            name: model.name,
-            label: model.label,
-            size: model.size,
-            width: model.width,
-            height: model.height
-          } : null,
-          palette: palette ? {
-            id: palette.id,
-            name: palette.name,
-            framework_class: palette.framework_class
-          } : null,
-          isPortrait: this.state.isPortrait,
-          isDarkMode: this.state.isDarkMode,
-        },
+        origin,
+        ...this.state,
+        screenClasses: this.screenClasses
       },
       bubbles: true
     })
@@ -465,14 +342,7 @@ class TRMNLPicker {
     if (!this.localStorageKey) return
 
     try {
-      const stateToSave = {
-        modelName: this.state.selectedModel?.name,
-        paletteId: this.state.selectedPalette?.id,
-        isPortrait: this.state.isPortrait,
-        isDarkMode: this.state.isDarkMode
-      }
-
-      localStorage.setItem(this.localStorageKey, JSON.stringify(stateToSave))
+      localStorage.setItem(this.localStorageKey, JSON.stringify(this.params))
     } catch (error) {
       console.warn('TRMNLPicker: Failed to save to localStorage:', error)
     }
@@ -483,27 +353,7 @@ class TRMNLPicker {
    * @private
    */
   _handleModelChange(event) {
-    const modelName = event.target.value
-    const model = this.models.find(m => m.name === modelName)
-
-    if (!model) return
-
-    // Update state
-    this.state.selectedModel = model
-
-    // Repopulate palettes for new model
-    this._populatePalettes()
-
-    // Select first valid palette of new model
-    const firstPaletteId = this._getFirstValidPaletteId(model)
-    this.elements.paletteSelect.value = firstPaletteId
-    this.state.selectedPalette = this.palettes.find(p => p.id === firstPaletteId)
-
-    // Update UI
-    this._updateResetButton()
-
-    // Emit change event
-    this._emitChangeEvent('form')
+    this._setParams('form', { modelName: event.target.value })
   }
 
   /**
@@ -511,16 +361,7 @@ class TRMNLPicker {
    * @private
    */
   _handlePaletteChange(event) {
-    const paletteId = event.target.value
-    const palette = this.palettes.find(p => p.id === paletteId)
-
-    this.state.selectedPalette = palette
-
-    // Update UI
-    this._updateResetButton()
-
-    // Emit change event
-    this._emitChangeEvent('form')
+    this._setParams('form', { paletteId: event.target.value })
   }
 
   /**
@@ -528,18 +369,7 @@ class TRMNLPicker {
    * @private
    */
   _toggleOrientation() {
-    this.state.isPortrait = !this.state.isPortrait
-
-    // Update optional UI elements
-    if (this.elements.orientationText) {
-      this.elements.orientationText.textContent = this.state.isPortrait ? 'Portrait' : 'Landscape'
-    }
-
-    // Update reset button state
-    this._updateResetButton()
-
-    // Emit change event
-    this._emitChangeEvent('form')
+    this._setParams('form', { isPortrait: !this._state.isPortrait })
   }
 
   /**
@@ -547,50 +377,25 @@ class TRMNLPicker {
    * @private
    */
   _toggleDarkMode() {
-    this.state.isDarkMode = !this.state.isDarkMode
-
-    // Update optional UI elements
-    if (this.elements.darkModeText) {
-      this.elements.darkModeText.textContent = this.state.isDarkMode ? 'Dark Mode' : 'Light Mode'
-    }
-
-    // Update reset button state
-    this._updateResetButton()
-
-    // Emit change event
-    this._emitChangeEvent('form')
+    this._setParams('form', { isDarkMode: !this._state.isDarkMode })
   }
 
   /**
    * Reset to defaults: first valid palette, landscape orientation, light mode
    * @private
    */
-  _resetToDefaults() {
-    const model = this.state.selectedModel
+  _resetToModelDefaults() {
+    const model = this._state.model
     if (!model) return
 
     // Reset to first valid palette of current model
     const firstPaletteId = this._getFirstValidPaletteId(model)
-    this.elements.paletteSelect.value = firstPaletteId
-    this.state.selectedPalette = this.palettes.find(p => p.id === firstPaletteId)
 
-    // Reset to landscape orientation
-    this.state.isPortrait = false
-    if (this.elements.orientationText) {
-      this.elements.orientationText.textContent = 'Landscape'
-    }
-
-    // Reset to light mode
-    this.state.isDarkMode = false
-    if (this.elements.darkModeText) {
-      this.elements.darkModeText.textContent = 'Light Mode'
-    }
-
-    // Update UI
-    this._updateResetButton()
-
-    // Emit change event
-    this._emitChangeEvent('form')
+    this._setParams('form', {
+      paletteId: firstPaletteId,
+      isPortrait: false,
+      isDarkMode: false
+    })
   }
 
   /**
@@ -601,13 +406,13 @@ class TRMNLPicker {
   _updateResetButton() {
     if (!this.elements.resetButton) return
 
-    const model = this.state.selectedModel
+    const model = this._state.model
     if (!model) return
 
     const firstValidPaletteId = this._getFirstValidPaletteId(model)
     const isPaletteDefault = this.elements.paletteSelect.value === String(firstValidPaletteId)
-    const isOrientationDefault = this.state.isPortrait === false
-    const isDarkModeDefault = this.state.isDarkMode === false
+    const isOrientationDefault = this._state.isPortrait === false
+    const isDarkModeDefault = this._state.isDarkMode === false
 
     const isAtDefaults = isPaletteDefault && isOrientationDefault && isDarkModeDefault
 
@@ -623,88 +428,145 @@ class TRMNLPicker {
   }
 
   /**
+   * Get current screen classes
+   * @public
+   * @returns {Array<string>} Array of CSS class names
+   */
+  get screenClasses() {
+    const model = this._state.model
+    const palette = this._state.palette
+
+    if (!model) {
+      throw new Error('No model selected')
+    }
+
+    const classes = []
+
+    // 0. Base screen class (always present)
+    classes.push('screen')
+
+    // 1. Palette framework class
+    if (palette && palette.framework_class) {
+      classes.push(palette.framework_class)
+    }
+
+    // 2. Model device class (from API)
+    if (model.css && model.css.classes && model.css.classes.device) {
+      classes.push(model.css.classes.device)
+    }
+
+    // 3. Model size class (from API)
+    if (model.css && model.css.classes && model.css.classes.size) {
+      classes.push(model.css.classes.size)
+    }
+
+    // 4. Orientation (UI state, only portrait - landscape is default)
+    if (this._state.isPortrait) {
+      classes.push('screen--portrait')
+    }
+
+    // 5. Scale (UI state, always 1x)
+    classes.push('screen--1x')
+
+    // 6. Dark mode (UI state, conditional)
+    if (this._state.isDarkMode) {
+      classes.push('screen--dark-mode')
+    }
+
+    return classes
+  }
+
+  /**
+   * Get current picker parameters
+   * @public
+   * @returns {Object} Current parameters including model name, palette ID, and flags
+   */
+  get params() {
+    return {
+      modelName: this._state.model?.name,
+      paletteId: this._state.palette?.id,
+      isPortrait: this._state.isPortrait,
+      isDarkMode: this._state.isDarkMode
+    }
+  }
+
+  /**
    * Update picker with new configuration
    * @public
-   * @param {Object} config - Configuration object
-   * @param {string} config.modelName - Model name to select
-   * @param {string} config.paletteId - Palette ID to select
-   * @param {boolean} config.isPortrait - Portrait orientation
-   * @param {boolean} config.isDarkMode - Dark mode enabled
+   * @param {Object} params - Configuration object
+   * @param {string} params.modelName - Model name to select
+   * @param {string} params.paletteId - Palette ID to select
+   * @param {boolean} params.isPortrait - Portrait orientation
+   * @param {boolean} params.isDarkMode - Dark mode enabled
    */
-  update(config) {
-    if (!config || typeof config !== 'object') {
-      throw new Error('TRMNLPicker.update: config must be an object')
+  setParams(params) {
+    this._setParams('setParams', params)
+  }
+
+  _setParams(origin, params) {
+    if (!params || typeof params !== 'object') {
+      throw new Error('params must be an object')
     }
 
     let changed = false
 
     // Update model if provided
-    if (config.modelName) {
-      const model = this.models.find(m => m.name === config.modelName)
+    if (params.modelName) {
+      const model = this.models.find(m => m.name === params.modelName)
       if (model) {
         this.elements.modelSelect.value = model.name
-        this.state.selectedModel = model
-        this._populatePalettes()
+        this._state.model = model
+        this._populateModelPalettes()
+
+        // Select first valid palette of new model
+        const firstPaletteId = this._getFirstValidPaletteId(model)
+        this.elements.paletteSelect.value = firstPaletteId
+        this._state.palette = this.palettes.find(p => p.id === firstPaletteId)
         changed = true
       }
     }
 
     // Update palette if provided
-    if (config.paletteId) {
-      const palette = this.palettes.find(p => p.id === config.paletteId)
+    if (params.paletteId) {
+      const palette = this.palettes.find(p => p.id === params.paletteId)
       if (palette) {
         this.elements.paletteSelect.value = palette.id
-        this.state.selectedPalette = palette
+        this._state.palette = palette
         changed = true
       }
     }
 
     // Update orientation if provided
-    if (typeof config.isPortrait === 'boolean') {
-      this.state.isPortrait = config.isPortrait
+    if (typeof params.isPortrait === 'boolean') {
+      this._state.isPortrait = params.isPortrait
       if (this.elements.orientationText) {
-        this.elements.orientationText.textContent = this.state.isPortrait ? 'Portrait' : 'Landscape'
+        this.elements.orientationText.textContent = this._state.isPortrait ? 'Portrait' : 'Landscape'
       }
       changed = true
     }
 
     // Update dark mode if provided
-    if (typeof config.isDarkMode === 'boolean') {
-      this.state.isDarkMode = config.isDarkMode
+    if (typeof params.isDarkMode === 'boolean') {
+      this._state.isDarkMode = params.isDarkMode
       if (this.elements.darkModeText) {
-        this.elements.darkModeText.textContent = this.state.isDarkMode ? 'Dark Mode' : 'Light Mode'
+        this.elements.darkModeText.textContent = this._state.isDarkMode ? 'Dark Mode' : 'Light Mode'
       }
       changed = true
     }
 
     if (changed) {
       this._updateResetButton()
-      this._emitChangeEvent('update')
     }
+
+    if (changed && origin) {
+      this._emitChangeEvent(origin)
+    }
+
+    return changed
   }
 
-  /**
-   * Get current picker state
-   * @public
-   * @returns {Object} Current state including model, palette, flags, and screen classes
-   */
-  getState() {
-    return {
-      model: this.state.selectedModel,
-      palette: this.state.selectedPalette,
-      isPortrait: this.state.isPortrait,
-      isDarkMode: this.state.isDarkMode,
-      screenClasses: this._calculateScreenClasses()
-    }
-  }
-
-  /**
-   * Get current screen classes
-   * @public
-   * @returns {Array<string>} Array of CSS class names
-   */
-  getScreenClasses() {
-    return this._calculateScreenClasses()
+  get state() {
+    return { ...this._state, };
   }
 
   /**
@@ -734,7 +596,7 @@ class TRMNLPicker {
     this.handlers = null
     this.models = null
     this.palettes = null
-    this.state = null
+    this._state = null
   }
 }
 
