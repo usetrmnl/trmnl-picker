@@ -389,8 +389,8 @@ class TRMNLPicker {
     const event = new CustomEvent('trmnl:change', {
       detail: {
         origin,
+        screenClasses: this.screenClasses,
         ...this.state,
-        screenClasses: this.screenClasses
       },
       bubbles: true
     })
