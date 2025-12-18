@@ -1,8 +1,29 @@
 /**
  * Default model to select when no localStorage state is found
+ * @private
  * @constant {string}
  */
-const DEFAULT_MODEL_NAME = 'og_plus'
+const _DEFAULT_MODEL_NAME = 'og_plus'
+
+/**
+ * Event fired when picker state changes
+ * @event TRMNLPicker#trmnl:change
+ * @type {CustomEvent}
+ * @property {Object} detail - Event details
+ * @property {string} detail.origin - What triggered the change: 'constructor', 'form', or 'setParams'
+ * @property {Array<string>} detail.screenClasses - Array of CSS classes for Framework CSS rendering
+ * @property {Object} detail.model - Current model object with name, label, width, height, kind, css properties
+ * @property {Object} detail.palette - Current palette object with id, name, framework_class properties
+ * @property {boolean} detail.isPortrait - Portrait orientation flag
+ * @property {boolean} detail.isDarkMode - Dark mode flag
+ *
+ * @example
+ * picker.formElement.addEventListener('trmnl:change', (event) => {
+ *   const { origin, screenClasses, model, palette } = event.detail
+ *   console.log(`Changed via ${origin}`)
+ *   console.log('Classes:', screenClasses)
+ * })
+ */
 
 /**
  * TRMNLPicker - Vanilla JS library for TRMNL device and palette selection
@@ -10,6 +31,12 @@ const DEFAULT_MODEL_NAME = 'og_plus'
  * Provides a reactive picker component that manages device models, color palettes,
  * orientation, and display mode. Emits 'trmnl:change' events with current state
  * and CSS classes for rendering.
+ * 
+ * **[View a live demo →](https://usetrmnl.github.io/trmnl-picker/example/)**
+ *
+ * **Note:** Using the constructor directly is not recommended. Use the static
+ * {@link TRMNLPicker.create} method instead, which automatically fetches
+ * models and palettes from the TRMNL API if not provided.
  *
  * @class TRMNLPicker
  * @param {string|Element} formIdOrElement - Form element ID or DOM element reference
@@ -18,21 +45,40 @@ const DEFAULT_MODEL_NAME = 'og_plus'
  * @param {Array<Object>} options.palettes - Array of palette objects from TRMNL API
  * @param {string} [options.localStorageKey] - Optional key for persisting state to localStorage
  *
- * @fires trmnl:change - Emitted when picker state changes, includes origin, state, and screenClasses
+ * @fires TRMNLPicker#trmnl:change
  *
  * @example
+ * // HTML Structure - Required form with data-* attributes
+ * // <form id="picker-form">
+ * //   <!-- Required: Model selector -->
+ * //   <select data-model-select></select>
+ * //
+ * //   <!-- Required: Palette selector -->
+ * //   <select data-palette-select></select>
+ * //
+ * //   <!-- Optional: Orientation toggle -->
+ * //   <button type="button" data-orientation-toggle>
+ * //     <span data-orientation-text>Landscape</span>
+ * //   </button>
+ * //
+ * //   <!-- Optional: Dark mode toggle -->
+ * //   <button type="button" data-dark-mode-toggle>
+ * //     <span data-dark-mode-text>Light Mode</span>
+ * //   </button>
+ * //
+ * //   <!-- Optional: Reset button -->
+ * //   <button type="button" data-reset-button>Reset</button>
+ * // </form>
+ *
  * // Create with element ID
- * const picker = new TRMNLPicker('screen-picker', { models, palettes })
+ * const picker = new TRMNLPicker('picker-form', { models, palettes })
  *
  * // Create with DOM element
- * const element = document.getElementById('picker')
+ * const element = document.getElementById('picker-form')
  * const picker = new TRMNLPicker(element, { models, palettes })
  *
  * // Listen for changes
  * picker.formElement.addEventListener('trmnl:change', (event) => {
- *   console.log(event.detail.origin) // 'form', 'setParams', 'constructor'
- *   console.log(event.detail.model)
- *   console.log(event.detail.palette)
  *   console.log(event.detail.screenClasses)
  * })
  */
@@ -293,7 +339,7 @@ class TRMNLPicker {
     if (savedParams) {
       this._setParams('constructor', savedParams)
     } else {
-      const defaultModel = sortedModels.find(m => m.name === DEFAULT_MODEL_NAME) || sortedModels[0]
+      const defaultModel = sortedModels.find(m => m.name === _DEFAULT_MODEL_NAME) || sortedModels[0]
       const defaultPaletteId = this._getFirstValidPaletteId(defaultModel)
 
       this._setParams('constructor', {
@@ -334,15 +380,7 @@ class TRMNLPicker {
    * Emit 'trmnl:change' event with current state and screen classes
    * @private
    * @param {string} origin - Source of the change ('constructor', 'form', 'setParams')
-   * @fires trmnl:change
-   *
-   * Event detail includes:
-   * - origin: string - What triggered the change
-   * - model: Object - Current model object with name, label, size, etc.
-   * - palette: Object - Current palette object with id, name, framework_class
-   * - isPortrait: boolean - Portrait orientation flag
-   * - isDarkMode: boolean - Dark mode flag
-   * - screenClasses: Array<string> - CSS classes for rendering
+   * @fires TRMNLPicker#trmnl:change
    */
   _emitChangeEvent(origin) {
     // Save to localStorage if key is configured
@@ -568,7 +606,7 @@ class TRMNLPicker {
    * @param {string} [params.paletteId] - Palette ID to select
    * @param {boolean} [params.isPortrait] - Portrait orientation
    * @param {boolean} [params.isDarkMode] - Dark mode enabled
-   * @fires trmnl:change - If any parameter changed successfully
+   * @fires TRMNLPicker#trmnl:change
    * @throws {Error} If params is not an object
    *
    * @example
@@ -660,11 +698,12 @@ class TRMNLPicker {
   /**
    * Get complete picker state including full model and palette objects
    * @public
-   * @returns {Object} Current state
-   * @returns {Object} return.model - Full model object from API
-   * @returns {Object} return.palette - Full palette object from API
-   * @returns {boolean} return.isPortrait - Portrait orientation flag
-   * @returns {boolean} return.isDarkMode - Dark mode flag
+   * @returns {{
+   *   model: Object,
+   *   palette: Object,
+   *   isPortrait: boolean,
+   *   isDarkMode: boolean
+   * }} State object containing model (full model object from API), palette (full palette object from API), isPortrait flag, and isDarkMode flag
    *
    * @example
    * const state = picker.state

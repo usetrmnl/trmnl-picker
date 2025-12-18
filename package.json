@@ -12,10 +12,11 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "npm run build:esm && npm run build:browser && npm run build:browser:min",
+    "build": "npm run build:esm && npm run build:browser && npm run build:browser:min && npm run build:docs",
     "build:esm": "esbuild src/index.js --bundle --format=esm --outfile=dist/trmnl-picker.esm.js --sourcemap",
     "build:browser": "esbuild src/index.js --bundle --format=iife --global-name=TRMNLPicker --outfile=dist/trmnl-picker.js --sourcemap --footer:js=\"TRMNLPicker=TRMNLPicker.default;\"",
     "build:browser:min": "esbuild src/index.js --bundle --format=iife --global-name=TRMNLPicker --minify --outfile=dist/trmnl-picker.min.js --sourcemap --footer:js=\"TRMNLPicker=TRMNLPicker.default;\"",
+    "build:docs": "documentation build src/index.js -f html -o doc --project-name '@trmnl/picker' --project-description 'JavaScript library for TRMNL device model and palette selection' --shallow && node scripts/expand-docs-nav.js",
     "watch": "npm run build:browser -- --watch",
     "prepublishOnly": "npm run build"
   },
@@ -30,6 +31,7 @@
   "author": "TRMNL",
   "license": "MIT",
   "devDependencies": {
+    "documentation": "^14.0.3",
     "esbuild": "^0.20.0"
   },
   "repository": {
