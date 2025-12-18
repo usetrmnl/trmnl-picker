@@ -1,14 +1,24 @@
 // src/index.js
+var _DEFAULT_MODEL_NAME = "og_plus";
 var TRMNLPicker = class _TRMNLPicker {
   static API_BASE_URL = "https://usetrmnl.com";
   /**
    * Create a TRMNLPicker instance, fetching data from TRMNL API if not provided
    * @static
-   * @param {string} formId - ID of the form element
+   * @param {string|Element} formIdOrElement - Form element ID or DOM element
    * @param {Object} options - Configuration options
-   * @param {Array<Object>} options.models - Optional models array
-   * @param {Array<Object>} options.palettes - Optional palettes array
+   * @param {Array<Object>} [options.models] - Optional models array (fetched from API if not provided)
+   * @param {Array<Object>} [options.palettes] - Optional palettes array (fetched from API if not provided)
+   * @param {string} [options.localStorageKey] - Optional key for state persistence
    * @returns {Promise<TRMNLPicker>} Promise resolving to picker instance
+   * @throws {Error} If API fetch fails when models or palettes are not provided
+   *
+   * @example
+   * // Fetch models and palettes from API
+   * const picker = await TRMNLPicker.create('screen-picker')
+   *
+   * // Provide your own data
+   * const picker = await TRMNLPicker.create('screen-picker', { models, palettes })
    */
   static async create(formId, options = {}) {
     let { models, palettes, localStorageKey } = options;
@@ -38,24 +48,24 @@ var TRMNLPicker = class _TRMNLPicker {
     }
     return new _TRMNLPicker(formId, { models, palettes, localStorageKey });
   }
-  constructor(formId, options = {}) {
-    if (!formId || typeof formId !== "string") {
-      throw new Error("TRMNLPicker: formId must be a non-empty string");
+  constructor(formIdOrElement, options = {}) {
+    if (!formIdOrElement) {
+      throw new Error("TRMNLPicker: formIdOrElement is required");
     }
-    this.formElement = document.getElementById(formId);
-    if (!this.formElement) {
-      throw new Error(`TRMNLPicker: Form element with id "${formId}" not found`);
+    if (typeof formIdOrElement === "string") {
+      this.formElement = document.getElementById(formIdOrElement);
+      if (!this.formElement) {
+        throw new Error(`TRMNLPicker: Form element with id "${formIdOrElement}" not found`);
+      }
+    } else if (formIdOrElement instanceof Element) {
+      this.formElement = formIdOrElement;
+    } else {
+      throw new Error("TRMNLPicker: formIdOrElement must be a string ID or DOM element");
     }
     const { models, palettes, localStorageKey } = options;
     this.models = models;
     this.palettes = palettes;
     this.localStorageKey = localStorageKey;
-    this.state = {
-      selectedModel: null,
-      selectedPalette: null,
-      isPortrait: false,
-      isDarkMode: false
-    };
     if (this.models && this.palettes) {
       if (!Array.isArray(this.models) || this.models.length === 0) {
         throw new Error("TRMNLPicker: models must be a non-empty array");
@@ -103,16 +113,16 @@ var TRMNLPicker = class _TRMNLPicker {
     return null;
   }
   /**
-   * Find and store references to form elements
+   * Find and store references to form elements using data-* attributes
    * @private
    */
   _initializeElements() {
     this.elements = {
-      modelSelect: this.formElement.querySelector("#model-select"),
-      paletteSelect: this.formElement.querySelector("#palette-select"),
-      orientationToggle: this.formElement.querySelector("#orientation-toggle"),
-      darkModeToggle: this.formElement.querySelector("#dark-mode-toggle"),
-      resetButton: this.formElement.querySelector("#reset-button"),
+      modelSelect: this.formElement.querySelector("[data-model-select]"),
+      paletteSelect: this.formElement.querySelector("[data-palette-select]"),
+      orientationToggle: this.formElement.querySelector("[data-orientation-toggle]"),
+      darkModeToggle: this.formElement.querySelector("[data-dark-mode-toggle]"),
+      resetButton: this.formElement.querySelector("[data-reset-button]"),
       // Optional: UI indicator elements
       orientationText: this.formElement.querySelector("[data-orientation-text]"),
       darkModeText: this.formElement.querySelector("[data-dark-mode-text]")
@@ -134,7 +144,7 @@ var TRMNLPicker = class _TRMNLPicker {
       paletteChange: this._handlePaletteChange.bind(this),
       orientationToggle: this._toggleOrientation.bind(this),
       darkModeToggle: this._toggleDarkMode.bind(this),
-      reset: this._resetToDefaults.bind(this)
+      reset: this._resetToModelDefaults.bind(this)
     };
     this.elements.modelSelect.addEventListener("change", this.handlers.modelChange);
     this.elements.paletteSelect.addEventListener("change", this.handlers.paletteChange);
@@ -189,51 +199,26 @@ var TRMNLPicker = class _TRMNLPicker {
       this.elements.modelSelect.appendChild(byodGroup);
     }
     const sortedModels = [...sortTRMNL, ...sortBYOD];
-    const savedState = this._loadFromLocalStorage();
-    let selectedModel = null;
-    if (savedState && savedState.modelName) {
-      selectedModel = this.models.find((m) => m.name === savedState.modelName);
+    this._state = {};
+    const savedParams = this._loadFromLocalStorage();
+    if (savedParams) {
+      this._setParams("constructor", savedParams);
+    } else {
+      const defaultModel = sortedModels.find((m) => m.name === _DEFAULT_MODEL_NAME) || sortedModels[0];
+      const defaultPaletteId = this._getFirstValidPaletteId(defaultModel);
+      this._setParams("constructor", {
+        modelName: defaultModel.name,
+        paletteId: defaultPaletteId,
+        isPortrait: false,
+        isDarkMode: false
+      });
     }
-    if (!selectedModel) {
-      selectedModel = sortedModels.find((m) => m.name === "og" || m.label && m.label.toLowerCase() === "trmnl og") || sortedModels.find((m) => m.name === "og_plus") || sortedModels.find((m) => m.name === "trmnl_original") || sortedModels[0];
-    }
-    this.elements.modelSelect.value = selectedModel.name;
-    this.state.selectedModel = selectedModel;
-    this._populatePalettes();
-    let paletteId = null;
-    if (savedState && savedState.paletteId) {
-      const savedPalette = this.palettes.find((p) => p.id === savedState.paletteId);
-      if (savedPalette && savedPalette.framework_class && savedPalette.framework_class.trim() !== "" && selectedModel.palette_ids.includes(savedState.paletteId)) {
-        paletteId = savedState.paletteId;
-      }
-    }
-    if (!paletteId) {
-      paletteId = this._getFirstValidPaletteId(selectedModel);
-    }
-    this.elements.paletteSelect.value = paletteId;
-    this.state.selectedPalette = this.palettes.find((p) => p.id === paletteId);
-    if (savedState) {
-      if (typeof savedState.isPortrait === "boolean") {
-        this.state.isPortrait = savedState.isPortrait;
-        if (this.elements.orientationText) {
-          this.elements.orientationText.textContent = this.state.isPortrait ? "Portrait" : "Landscape";
-        }
-      }
-      if (typeof savedState.isDarkMode === "boolean") {
-        this.state.isDarkMode = savedState.isDarkMode;
-        if (this.elements.darkModeText) {
-          this.elements.darkModeText.textContent = this.state.isDarkMode ? "Dark Mode" : "Light Mode";
-        }
-      }
-    }
-    this._updateResetButton();
-    this._emitChangeEvent();
   }
   /**
    * Populate palette dropdown based on selected model
    * @private
    */
-  _populatePalettes() {
+  _populateModelPalettes() {
     const modelName = this.elements.modelSelect.value;
     const model = this.models.find((m) => m.name === modelName);
     if (!model)
@@ -250,58 +235,18 @@ var TRMNLPicker = class _TRMNLPicker {
     });
   }
   /**
-   * Calculate screen classes based on current state
+   * Emit 'trmnl:change' event with current state and screen classes
    * @private
-   * @returns {Array<string>} Array of CSS class names
+   * @param {string} origin - Source of the change ('constructor', 'form', 'setParams')
+   * @fires TRMNLPicker#trmnl:change
    */
-  _calculateScreenClasses() {
-    const model = this.state.selectedModel;
-    const palette = this.state.selectedPalette;
-    if (!model) {
-      throw new Error("No model selected");
-    }
-    const classes = [];
-    if (palette && palette.framework_class) {
-      classes.push(palette.framework_class);
-    }
-    classes.push(`screen--${model.name}`);
-    if (model.size) {
-      classes.push(`screen--${model.size}`);
-    }
-    classes.push(`screen--${this.state.isPortrait ? "portrait" : "landscape"}`);
-    classes.push("screen--1x");
-    if (this.state.isDarkMode) {
-      classes.push("screen--dark-mode");
-    }
-    return classes;
-  }
-  /**
-   * Emit 'changed' event with current state and screen classes
-   * @private
-   */
-  _emitChangeEvent() {
-    const model = this.state.selectedModel;
-    const palette = this.state.selectedPalette;
+  _emitChangeEvent(origin) {
     this._saveToLocalStorage();
-    const event = new CustomEvent("changed", {
+    const event = new CustomEvent("trmnl:change", {
       detail: {
-        screenClasses: this._calculateScreenClasses(),
-        state: {
-          model: model ? {
-            name: model.name,
-            label: model.label,
-            size: model.size,
-            width: model.width,
-            height: model.height
-          } : null,
-          palette: palette ? {
-            id: palette.id,
-            name: palette.name,
-            framework_class: palette.framework_class
-          } : null,
-          isPortrait: this.state.isPortrait,
-          isDarkMode: this.state.isDarkMode
-        }
+        origin,
+        screenClasses: this.screenClasses,
+        ...this.state
       },
       bubbles: true
     });
@@ -333,13 +278,7 @@ var TRMNLPicker = class _TRMNLPicker {
     if (!this.localStorageKey)
       return;
     try {
-      const stateToSave = {
-        modelName: this.state.selectedModel?.name,
-        paletteId: this.state.selectedPalette?.id,
-        isPortrait: this.state.isPortrait,
-        isDarkMode: this.state.isDarkMode
-      };
-      localStorage.setItem(this.localStorageKey, JSON.stringify(stateToSave));
+      localStorage.setItem(this.localStorageKey, JSON.stringify(this.params));
     } catch (error) {
       console.warn("TRMNLPicker: Failed to save to localStorage:", error);
     }
@@ -349,74 +288,43 @@ var TRMNLPicker = class _TRMNLPicker {
    * @private
    */
   _handleModelChange(event) {
-    const modelName = event.target.value;
-    const model = this.models.find((m) => m.name === modelName);
-    if (!model)
-      return;
-    this.state.selectedModel = model;
-    this._populatePalettes();
-    const firstPaletteId = this._getFirstValidPaletteId(model);
-    this.elements.paletteSelect.value = firstPaletteId;
-    this.state.selectedPalette = this.palettes.find((p) => p.id === firstPaletteId);
-    this._updateResetButton();
-    this._emitChangeEvent();
+    this._setParams("form", { modelName: event.target.value });
   }
   /**
    * Handle palette selection change
    * @private
    */
   _handlePaletteChange(event) {
-    const paletteId = event.target.value;
-    const palette = this.palettes.find((p) => p.id === paletteId);
-    this.state.selectedPalette = palette;
-    this._updateResetButton();
-    this._emitChangeEvent();
+    this._setParams("form", { paletteId: event.target.value });
   }
   /**
    * Toggle orientation between portrait and landscape
    * @private
    */
   _toggleOrientation() {
-    this.state.isPortrait = !this.state.isPortrait;
-    if (this.elements.orientationText) {
-      this.elements.orientationText.textContent = this.state.isPortrait ? "Portrait" : "Landscape";
-    }
-    this._updateResetButton();
-    this._emitChangeEvent();
+    this._setParams("form", { isPortrait: !this._state.isPortrait });
   }
   /**
    * Toggle dark mode on/off
    * @private
    */
   _toggleDarkMode() {
-    this.state.isDarkMode = !this.state.isDarkMode;
-    if (this.elements.darkModeText) {
-      this.elements.darkModeText.textContent = this.state.isDarkMode ? "Dark Mode" : "Light Mode";
-    }
-    this._updateResetButton();
-    this._emitChangeEvent();
+    this._setParams("form", { isDarkMode: !this._state.isDarkMode });
   }
   /**
    * Reset to defaults: first valid palette, landscape orientation, light mode
    * @private
    */
-  _resetToDefaults() {
-    const model = this.state.selectedModel;
+  _resetToModelDefaults() {
+    const model = this._state.model;
     if (!model)
       return;
     const firstPaletteId = this._getFirstValidPaletteId(model);
-    this.elements.paletteSelect.value = firstPaletteId;
-    this.state.selectedPalette = this.palettes.find((p) => p.id === firstPaletteId);
-    this.state.isPortrait = false;
-    if (this.elements.orientationText) {
-      this.elements.orientationText.textContent = "Landscape";
-    }
-    this.state.isDarkMode = false;
-    if (this.elements.darkModeText) {
-      this.elements.darkModeText.textContent = "Light Mode";
-    }
-    this._updateResetButton();
-    this._emitChangeEvent();
+    this._setParams("form", {
+      paletteId: firstPaletteId,
+      isPortrait: false,
+      isDarkMode: false
+    });
   }
   /**
    * Update reset button enabled/disabled state
@@ -426,13 +334,13 @@ var TRMNLPicker = class _TRMNLPicker {
   _updateResetButton() {
     if (!this.elements.resetButton)
       return;
-    const model = this.state.selectedModel;
+    const model = this._state.model;
     if (!model)
       return;
     const firstValidPaletteId = this._getFirstValidPaletteId(model);
     const isPaletteDefault = this.elements.paletteSelect.value === String(firstValidPaletteId);
-    const isOrientationDefault = this.state.isPortrait === false;
-    const isDarkModeDefault = this.state.isDarkMode === false;
+    const isOrientationDefault = this._state.isPortrait === false;
+    const isDarkModeDefault = this._state.isDarkMode === false;
     const isAtDefaults = isPaletteDefault && isOrientationDefault && isDarkModeDefault;
     this.elements.resetButton.disabled = isAtDefaults;
     if (isAtDefaults) {
@@ -444,68 +352,175 @@ var TRMNLPicker = class _TRMNLPicker {
     }
   }
   /**
-   * Update picker with new configuration
+   * Get CSS classes for the current picker configuration
    * @public
-   * @param {Object} config - Configuration object
-   * @param {string} config.modelName - Model name to select
-   * @param {string} config.paletteId - Palette ID to select
-   * @param {boolean} config.isPortrait - Portrait orientation
-   * @param {boolean} config.isDarkMode - Dark mode enabled
+   * @returns {Array<string>} Array of CSS class names for Framework CSS rendering
+   *
+   * Generated classes (in order):
+   * 1. 'screen' - Base class (always present)
+   * 2. palette.framework_class - From selected palette (e.g., 'screen--1bit')
+   * 3. model.css.classes.device - From model API (e.g., 'screen--v2')
+   * 4. model.css.classes.size - From model API (e.g., 'screen--md')
+   * 5. 'screen--portrait' - Only when portrait orientation is enabled
+   * 6. 'screen--1x' - Scale indicator (always 1x)
+   * 7. 'screen--dark-mode' - Only when dark mode is enabled
+   *
+   * @example
+   * const classes = picker.screenClasses
+   * // ['screen', 'screen--1bit', 'screen--v2', 'screen--md', 'screen--1x']
    */
-  update(config) {
-    if (!config || typeof config !== "object") {
-      throw new Error("TRMNLPicker.update: config must be an object");
+  get screenClasses() {
+    const model = this._state.model;
+    const palette = this._state.palette;
+    if (!model) {
+      throw new Error("No model selected");
+    }
+    const classes = [];
+    classes.push("screen");
+    if (palette && palette.framework_class) {
+      classes.push(palette.framework_class);
+    }
+    if (model.css && model.css.classes && model.css.classes.device) {
+      classes.push(model.css.classes.device);
+    }
+    if (model.css && model.css.classes && model.css.classes.size) {
+      classes.push(model.css.classes.size);
+    }
+    if (this._state.isPortrait) {
+      classes.push("screen--portrait");
+    }
+    classes.push("screen--1x");
+    if (this._state.isDarkMode) {
+      classes.push("screen--dark-mode");
+    }
+    return classes;
+  }
+  /**
+   * Get current picker parameters (serializable state)
+   * @public
+   * @returns {Object} Current parameters for persistence or API calls
+   * @returns {string} return.modelName - Selected model name
+   * @returns {string} return.paletteId - Selected palette ID
+   * @returns {boolean} return.isPortrait - Portrait orientation flag
+   * @returns {boolean} return.isDarkMode - Dark mode flag
+   *
+   * @example
+   * const params = picker.params
+   * // { modelName: 'og_plus', paletteId: '123', isPortrait: false, isDarkMode: false }
+   *
+   * // Can be used to restore state later
+   * localStorage.setItem('picker-state', JSON.stringify(picker.params))
+   */
+  get params() {
+    return {
+      modelName: this._state.model?.name,
+      paletteId: this._state.palette?.id,
+      isPortrait: this._state.isPortrait,
+      isDarkMode: this._state.isDarkMode
+    };
+  }
+  /**
+   * Update picker configuration programmatically
+   * @public
+   * @param {Object} params - Configuration object (all fields optional)
+   * @param {string} [params.modelName] - Model name to select
+   * @param {string} [params.paletteId] - Palette ID to select
+   * @param {boolean} [params.isPortrait] - Portrait orientation
+   * @param {boolean} [params.isDarkMode] - Dark mode enabled
+   * @fires TRMNLPicker#trmnl:change
+   * @throws {Error} If params is not an object
+   *
+   * @example
+   * // Update single parameter
+   * picker.setParams({ isDarkMode: true })
+   *
+   * // Update multiple parameters
+   * picker.setParams({
+   *   modelName: 'og_plus',
+   *   paletteId: '123',
+   *   isPortrait: true
+   * })
+   *
+   * // Note: Changing model resets palette to first valid palette of that model
+   */
+  setParams(params) {
+    this._setParams("setParams", params);
+  }
+  /**
+   * Internal method to update picker state with origin tracking
+   * @private
+   * @param {string} origin - Source of change ('constructor', 'form', 'setParams')
+   * @param {Object} params - Parameters to update
+   * @returns {boolean} True if any changes were made
+   */
+  _setParams(origin, params) {
+    if (!params || typeof params !== "object") {
+      throw new Error("params must be an object");
     }
     let changed = false;
-    if (config.modelName) {
-      const model = this.models.find((m) => m.name === config.modelName);
+    if (params.modelName) {
+      const model = this.models.find((m) => m.name === params.modelName);
       if (model) {
         this.elements.modelSelect.value = model.name;
-        this.state.selectedModel = model;
-        this._populatePalettes();
+        this._state.model = model;
+        this._populateModelPalettes();
+        const firstPaletteId = this._getFirstValidPaletteId(model);
+        this.elements.paletteSelect.value = firstPaletteId;
+        this._state.palette = this.palettes.find((p) => p.id === firstPaletteId);
         changed = true;
       }
     }
-    if (config.paletteId) {
-      const palette = this.palettes.find((p) => p.id === config.paletteId);
+    if (params.paletteId) {
+      const palette = this.palettes.find((p) => p.id === params.paletteId);
       if (palette) {
         this.elements.paletteSelect.value = palette.id;
-        this.state.selectedPalette = palette;
+        this._state.palette = palette;
         changed = true;
       }
     }
-    if (typeof config.isPortrait === "boolean") {
-      this.state.isPortrait = config.isPortrait;
+    if (typeof params.isPortrait === "boolean") {
+      this._state.isPortrait = params.isPortrait;
       if (this.elements.orientationText) {
-        this.elements.orientationText.textContent = this.state.isPortrait ? "Portrait" : "Landscape";
+        this.elements.orientationText.textContent = this._state.isPortrait ? "Portrait" : "Landscape";
       }
       changed = true;
     }
-    if (typeof config.isDarkMode === "boolean") {
-      this.state.isDarkMode = config.isDarkMode;
+    if (typeof params.isDarkMode === "boolean") {
+      this._state.isDarkMode = params.isDarkMode;
       if (this.elements.darkModeText) {
-        this.elements.darkModeText.textContent = this.state.isDarkMode ? "Dark Mode" : "Light Mode";
+        this.elements.darkModeText.textContent = this._state.isDarkMode ? "Dark Mode" : "Light Mode";
       }
       changed = true;
     }
     if (changed) {
       this._updateResetButton();
-      this._emitChangeEvent();
     }
+    if (changed && origin) {
+      this._emitChangeEvent(origin);
+    }
+    return changed;
   }
   /**
-   * Get current picker state
+   * Get complete picker state including full model and palette objects
    * @public
-   * @returns {Object} Current state including model, palette, flags, and screen classes
+   * @returns {{
+   *   model: Object,
+   *   palette: Object,
+   *   isPortrait: boolean,
+   *   isDarkMode: boolean
+   * }} State object containing model (full model object from API), palette (full palette object from API), isPortrait flag, and isDarkMode flag
+   *
+   * @example
+   * const state = picker.state
+   * // {
+   * //   model: { name: 'og_plus', label: 'OG+', width: 800, height: 480, ... },
+   * //   palette: { id: '123', name: 'Black', framework_class: 'screen--1bit', ... },
+   * //   isPortrait: false,
+   * //   isDarkMode: false
+   * // }
    */
-  getState() {
-    return {
-      model: this.state.selectedModel,
-      palette: this.state.selectedPalette,
-      isPortrait: this.state.isPortrait,
-      isDarkMode: this.state.isDarkMode,
-      screenClasses: this._calculateScreenClasses()
-    };
+  get state() {
+    return { ...this._state };
   }
   /**
    * Clean up event listeners and references
@@ -528,7 +543,7 @@ var TRMNLPicker = class _TRMNLPicker {
     this.handlers = null;
     this.models = null;
     this.palettes = null;
-    this.state = null;
+    this._state = null;
   }
 };
 var src_default = TRMNLPicker;

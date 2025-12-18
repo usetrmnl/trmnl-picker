@@ -1,0 +1,974 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset='utf-8'>
+  <title>@trmnl/picker 0.1.0 | Documentation</title>
+  <meta name='description' content='Vanilla JavaScript library for TRMNL device model and palette selection'>
+  <meta name='viewport' content='width=device-width,initial-scale=1'>
+  <link href='assets/bass.css' rel='stylesheet'>
+  <link href='assets/style.css' rel='stylesheet'>
+  <link href='assets/github.css' rel='stylesheet'>
+  <link href='assets/split.css' rel='stylesheet'>
+</head>
+<body class='documentation m0'>
+    <div class='flex'>
+      <div id='split-left' class='overflow-auto fs0 height-viewport-100'>
+        <div class='py1 px2'>
+          <h3 class='mb0 no-anchor'>@trmnl/picker</h3>
+          <div class='mb1'><code>0.1.0</code></div>
+          <input
+            placeholder='Filter'
+            id='filter-input'
+            class='col12 block input'
+            spellcheck='false'
+            autocapitalize='off'
+            autocorrect='off'
+            type='text' />
+          <div id='toc'>
+            <ul class='list-reset h5 py1-ul'>
+              
+                
+                <li><a
+                  href='#eventtrmnlpickertrmnlchange'
+                  class="">
+                  TRMNLPicker#trmnl:change
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#trmnlpicker'
+                  class=" toggle-sibling">
+                  TRMNLPicker
+                  <span class='icon'>▾</span>
+                </a>
+                
+                <div class='toggle-target'>
+                  
+                  <ul class='list-reset py1-ul pl1'>
+                    <li class='h5'><span>Static members</span></li>
+                    
+                      <li><a
+                        href='#trmnlpickercreate'
+                        class='regular pre-open'>
+                        .create
+                      </a></li>
+                    
+                    </ul>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#trmnlpickerscreenclasses'
+                        class='regular pre-open'>
+                        #screenClasses
+                      </a></li>
+                      
+                      <li><a
+                        href='#trmnlpickerparams'
+                        class='regular pre-open'>
+                        #params
+                      </a></li>
+                      
+                      <li><a
+                        href='#trmnlpickersetparams'
+                        class='regular pre-open'>
+                        #setParams
+                      </a></li>
+                      
+                      <li><a
+                        href='#trmnlpickerstate'
+                        class='regular pre-open'>
+                        #state
+                      </a></li>
+                      
+                      <li><a
+                        href='#trmnlpickerdestroy'
+                        class='regular pre-open'>
+                        #destroy
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+            </ul>
+          </div>
+          <div class='mt1 h6 quiet'>
+            <a href='https://documentation.js.org/reading-documentation.html'>Need help reading this?</a>
+          </div>
+        </div>
+      </div>
+      <div id='split-right' class='relative overflow-auto height-viewport-100'>
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='eventtrmnlpickertrmnlchange'>
+      TRMNLPicker#trmnl:change
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>Event fired when picker state changes</p>
+
+    <div class='pre p1 fill-light mt0'>TRMNLPicker#trmnl:change</div>
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/API/CustomEvent/CustomEvent">CustomEvent</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>detail</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+          : Event details
+
+          
+            <ul>
+              
+                <li><code>detail.origin</code> <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>
+                  
+                  <p>What triggered the change: 'constructor', 'form', or 'setParams'</p>
+</li>
+              
+                <li><code>detail.screenClasses</code> <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>>
+                  
+                  <p>Array of CSS classes for Framework CSS rendering</p>
+</li>
+              
+                <li><code>detail.model</code> <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+                  
+                  <p>Current model object with name, label, width, height, kind, css properties</p>
+</li>
+              
+                <li><code>detail.palette</code> <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+                  
+                  <p>Current palette object with id, name, framework_class properties</p>
+</li>
+              
+                <li><code>detail.isPortrait</code> <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>
+                  
+                  <p>Portrait orientation flag</p>
+</li>
+              
+                <li><code>detail.isDarkMode</code> <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>
+                  
+                  <p>Dark mode flag</p>
+</li>
+              
+            </ul>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'>picker.<span class="hljs-property">formElement</span>.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;trmnl:change&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> { origin, screenClasses, model, palette } = event.<span class="hljs-property">detail</span>
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`Changed via <span class="hljs-subst">${origin}</span>`</span>)
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Classes:&#x27;</span>, screenClasses)
+})</pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='trmnlpicker'>
+      TRMNLPicker
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>TRMNLPicker - Vanilla JS library for TRMNL device and palette selection</p>
+<p>Provides a reactive picker component that manages device models, color palettes,
+orientation, and display mode. Emits 'trmnl:change' events with current state
+and CSS classes for rendering.</p>
+<p><strong><a href="https://usetrmnl.github.io/trmnl-picker/example/">View a live demo →</a></strong></p>
+<p><strong>Note:</strong> Using the constructor directly is not recommended. Use the static
+<a href="#trmnlpickercreate">TRMNLPicker.create</a> method instead, which automatically fetches
+models and palettes from the TRMNL API if not provided.</p>
+
+    <div class='pre p1 fill-light mt0'>new TRMNLPicker(formIdOrElement: (<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a> | <a href="https://developer.mozilla.org/docs/Web/API/Element">Element</a>), options: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>formIdOrElement</span> <code class='quiet'>((<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a> | <a href="https://developer.mozilla.org/docs/Web/API/Element">Element</a>))</code>
+	    Form element ID or DOM element reference
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>options</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    Configuration options
+
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>options.models</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>></code>
+  </td>
+  <td class='break-word'><span>Array of model objects from TRMNL API
+</span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>options.palettes</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>></code>
+  </td>
+  <td class='break-word'><span>Array of palette objects from TRMNL API
+</span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>options.localStorageKey</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?</code>
+  </td>
+  <td class='break-word'><span>Optional key for persisting state to localStorage
+</span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// HTML Structure - Required form with data-* attributes</span>
+<span class="hljs-comment">// &lt;form id=&quot;picker-form&quot;&gt;</span>
+<span class="hljs-comment">//   &lt;!-- Required: Model selector --&gt;</span>
+<span class="hljs-comment">//   &lt;select data-model-select&gt;&lt;/select&gt;</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//   &lt;!-- Required: Palette selector --&gt;</span>
+<span class="hljs-comment">//   &lt;select data-palette-select&gt;&lt;/select&gt;</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//   &lt;!-- Optional: Orientation toggle --&gt;</span>
+<span class="hljs-comment">//   &lt;button type=&quot;button&quot; data-orientation-toggle&gt;</span>
+<span class="hljs-comment">//     &lt;span data-orientation-text&gt;Landscape&lt;/span&gt;</span>
+<span class="hljs-comment">//   &lt;/button&gt;</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//   &lt;!-- Optional: Dark mode toggle --&gt;</span>
+<span class="hljs-comment">//   &lt;button type=&quot;button&quot; data-dark-mode-toggle&gt;</span>
+<span class="hljs-comment">//     &lt;span data-dark-mode-text&gt;Light Mode&lt;/span&gt;</span>
+<span class="hljs-comment">//   &lt;/button&gt;</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">//   &lt;!-- Optional: Reset button --&gt;</span>
+<span class="hljs-comment">//   &lt;button type=&quot;button&quot; data-reset-button&gt;Reset&lt;/button&gt;</span>
+<span class="hljs-comment">// &lt;/form&gt;</span>
+
+<span class="hljs-comment">// Create with element ID</span>
+<span class="hljs-keyword">const</span> picker = <span class="hljs-keyword">new</span> <span class="hljs-title class_">TRMNLPicker</span>(<span class="hljs-string">&#x27;picker-form&#x27;</span>, { models, palettes })
+
+<span class="hljs-comment">// Create with DOM element</span>
+<span class="hljs-keyword">const</span> element = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;picker-form&#x27;</span>)
+<span class="hljs-keyword">const</span> picker = <span class="hljs-keyword">new</span> <span class="hljs-title class_">TRMNLPicker</span>(element, { models, palettes })
+
+<span class="hljs-comment">// Listen for changes</span>
+picker.<span class="hljs-property">formElement</span>.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;trmnl:change&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(event.<span class="hljs-property">detail</span>.<span class="hljs-property">screenClasses</span>)
+})</pre>
+    
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Static Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='trmnlpickercreate'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>create(formId, options, formIdOrElement)</span>
+        </div>
+      </div>
+      <div class='clearfix toggle-target'>
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Create a TRMNLPicker instance, fetching data from TRMNL API if not provided</p>
+
+    <div class='pre p1 fill-light mt0'>create(formId: any, options: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, formIdOrElement: (<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a> | <a href="https://developer.mozilla.org/docs/Web/API/Element">Element</a>)): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;<a href="#trmnlpicker">TRMNLPicker</a>></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>formId</span> <code class='quiet'>(any)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>options</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+            = <code>{}</code>)</code>
+	    Configuration options
+
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>options.models</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>>?</code>
+  </td>
+  <td class='break-word'><span>Optional models array (fetched from API if not provided)
+</span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>options.palettes</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>>?</code>
+  </td>
+  <td class='break-word'><span>Optional palettes array (fetched from API if not provided)
+</span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>options.localStorageKey</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?</code>
+  </td>
+  <td class='break-word'><span>Optional key for state persistence
+</span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>formIdOrElement</span> <code class='quiet'>((<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a> | <a href="https://developer.mozilla.org/docs/Web/API/Element">Element</a>))</code>
+	    Form element ID or DOM element
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;<a href="#trmnlpicker">TRMNLPicker</a>></code>:
+        Promise resolving to picker instance
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Throws</div>
+    <ul>
+      
+        <li><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error">Error</a>: If API fetch fails when models or palettes are not provided
+</li>
+      
+    </ul>
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// Fetch models and palettes from API</span>
+<span class="hljs-keyword">const</span> picker = <span class="hljs-keyword">await</span> <span class="hljs-title class_">TRMNLPicker</span>.<span class="hljs-title function_">create</span>(<span class="hljs-string">&#x27;screen-picker&#x27;</span>)
+
+<span class="hljs-comment">// Provide your own data</span>
+<span class="hljs-keyword">const</span> picker = <span class="hljs-keyword">await</span> <span class="hljs-title class_">TRMNLPicker</span>.<span class="hljs-title function_">create</span>(<span class="hljs-string">&#x27;screen-picker&#x27;</span>, { models, palettes })</pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='trmnlpickerscreenclasses'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>screenClasses</span>
+        </div>
+      </div>
+      <div class='clearfix toggle-target'>
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Get CSS classes for the current picker configuration</p>
+
+    <div class='pre p1 fill-light mt0'>screenClasses</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>></code>:
+        Array of CSS class names for Framework CSS rendering
+<p>Generated classes (in order):</p>
+<ol>
+<li>'screen' - Base class (always present)</li>
+<li>palette.framework_class - From selected palette (e.g., 'screen--1bit')</li>
+<li>model.css.classes.device - From model API (e.g., 'screen--v2')</li>
+<li>model.css.classes.size - From model API (e.g., 'screen--md')</li>
+<li>'screen--portrait' - Only when portrait orientation is enabled</li>
+<li>'screen--1x' - Scale indicator (always 1x)</li>
+<li>'screen--dark-mode' - Only when dark mode is enabled</li>
+</ol>
+
+      
+    
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> classes = picker.<span class="hljs-property">screenClasses</span>
+<span class="hljs-comment">// [&#x27;screen&#x27;, &#x27;screen--1bit&#x27;, &#x27;screen--v2&#x27;, &#x27;screen--md&#x27;, &#x27;screen--1x&#x27;]</span></pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='trmnlpickerparams'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>params</span>
+        </div>
+      </div>
+      <div class='clearfix toggle-target'>
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Get current picker parameters (serializable state)</p>
+
+    <div class='pre p1 fill-light mt0'>params</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
+        Current parameters for persistence or API calls
+
+      
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>:
+        return.modelName - Selected model name
+
+      
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>:
+        return.paletteId - Selected palette ID
+
+      
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></code>:
+        return.isPortrait - Portrait orientation flag
+
+      
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></code>:
+        return.isDarkMode - Dark mode flag
+
+      
+    
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> params = picker.<span class="hljs-property">params</span>
+<span class="hljs-comment">// { modelName: &#x27;og_plus&#x27;, paletteId: &#x27;123&#x27;, isPortrait: false, isDarkMode: false }</span>
+
+<span class="hljs-comment">// Can be used to restore state later</span>
+<span class="hljs-variable language_">localStorage</span>.<span class="hljs-title function_">setItem</span>(<span class="hljs-string">&#x27;picker-state&#x27;</span>, <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(picker.<span class="hljs-property">params</span>))</pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='trmnlpickersetparams'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>setParams(params)</span>
+        </div>
+      </div>
+      <div class='clearfix toggle-target'>
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Update picker configuration programmatically</p>
+
+    <div class='pre p1 fill-light mt0'>setParams(params: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>params</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    Configuration object (all fields optional)
+
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>params.modelName</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?</code>
+  </td>
+  <td class='break-word'><span>Model name to select
+</span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>params.paletteId</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?</code>
+  </td>
+  <td class='break-word'><span>Palette ID to select
+</span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>params.isPortrait</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>?</code>
+  </td>
+  <td class='break-word'><span>Portrait orientation
+</span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>params.isDarkMode</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>?</code>
+  </td>
+  <td class='break-word'><span>Dark mode enabled
+</span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Throws</div>
+    <ul>
+      
+        <li><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error">Error</a>: If params is not an object
+</li>
+      
+    </ul>
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// Update single parameter</span>
+picker.<span class="hljs-title function_">setParams</span>({ <span class="hljs-attr">isDarkMode</span>: <span class="hljs-literal">true</span> })
+
+<span class="hljs-comment">// Update multiple parameters</span>
+picker.<span class="hljs-title function_">setParams</span>({
+  <span class="hljs-attr">modelName</span>: <span class="hljs-string">&#x27;og_plus&#x27;</span>,
+  <span class="hljs-attr">paletteId</span>: <span class="hljs-string">&#x27;123&#x27;</span>,
+  <span class="hljs-attr">isPortrait</span>: <span class="hljs-literal">true</span>
+})
+
+<span class="hljs-comment">// Note: Changing model resets palette to first valid palette of that model</span></pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='trmnlpickerstate'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>state</span>
+        </div>
+      </div>
+      <div class='clearfix toggle-target'>
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Get complete picker state including full model and palette objects</p>
+
+    <div class='pre p1 fill-light mt0'>state</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code>{model: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, palette: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, isPortrait: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>, isDarkMode: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>}</code>:
+        State object containing model (full model object from API), palette (full palette object from API), isPortrait flag, and isDarkMode flag
+
+      
+    
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> state = picker.<span class="hljs-property">state</span>
+<span class="hljs-comment">// {</span>
+<span class="hljs-comment">//   model: { name: &#x27;og_plus&#x27;, label: &#x27;OG+&#x27;, width: 800, height: 480, ... },</span>
+<span class="hljs-comment">//   palette: { id: &#x27;123&#x27;, name: &#x27;Black&#x27;, framework_class: &#x27;screen--1bit&#x27;, ... },</span>
+<span class="hljs-comment">//   isPortrait: false,</span>
+<span class="hljs-comment">//   isDarkMode: false</span>
+<span class="hljs-comment">// }</span></pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='trmnlpickerdestroy'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>destroy()</span>
+        </div>
+      </div>
+      <div class='clearfix toggle-target'>
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Clean up event listeners and references</p>
+
+    <div class='pre p1 fill-light mt0'>destroy()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+      </div>
+    </div>
+  <script src='assets/anchor.js'></script>
+  <script src='assets/split.js'></script>
+  <script src='assets/site.js'></script>
+</body>
+</html>
