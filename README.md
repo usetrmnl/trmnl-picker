@@ -103,8 +103,8 @@ The picker will automatically:
 ### 3. Listen for Changes
 
 ```javascript
-document.getElementById('picker-form').addEventListener('trmnl:changed', (event) => {
-  const { source, screenClasses, state } = event.detail
+document.getElementById('picker-form').addEventListener('trmnl:change', (event) => {
+  const { origin, screenClasses, model, palette } = event.detail
 
   document.querySelectorAll('.screen').forEach(screen => {
     screen.className = screenClasses.join(' ')
@@ -144,72 +144,71 @@ const picker = await TRMNLPicker.create('picker-form', { models, palettes })
 
 **Throws:** Error if API fetch fails or data is invalid
 
-### Methods
+### Methods and Properties
 
-#### `update(config)`
+#### `setParams(params)`
 
 Programmatically update picker state.
 
 ```javascript
-picker.update({
-  modelName: 'trmnl_original',  // Model name to select
-  paletteId: 'bw',              // Palette ID to select
+picker.setParams({
+  modelName: 'og_plus',         // Model name to select
+  paletteId: '123',             // Palette ID to select
   isPortrait: true,             // Set portrait orientation
   isDarkMode: false             // Set dark mode
 })
 ```
 
 **Parameters:**
-- `config.modelName` (string, optional): Model name to select
-- `config.paletteId` (string, optional): Palette ID to select
-- `config.isPortrait` (boolean, optional): Set portrait orientation
-- `config.isDarkMode` (boolean, optional): Enable/disable dark mode
+- `params.modelName` (string, optional): Model name to select
+- `params.paletteId` (string, optional): Palette ID to select
+- `params.isPortrait` (boolean, optional): Set portrait orientation
+- `params.isDarkMode` (boolean, optional): Enable/disable dark mode
 
-#### `getState()`
+**Note:** Changing the model automatically resets the palette to the first valid palette for that model.
 
-Get current picker state.
+#### `state` (getter)
+
+Get current picker state with full model and palette objects.
 
 ```javascript
-const state = picker.getState()
+const { model, palette, isPortrait, isDarkMode } = picker.state
 ```
 
 **Returns:**
 ```javascript
 {
-  model: {
-    name: 'trmnl_original',
-    label: 'TRMNL Original',
-    size: 'md',
-    width: 800,
-    height: 480
-  },
-  palette: {
-    id: 'bw',
-    name: 'Black & White',
-    framework_class: 'screen--1bit'
-  },
+  model: { ... },
+  palette: { ... },
   isPortrait: false,
-  isDarkMode: false,
-  screenClasses: [
-    'screen',
-    'screen--1bit',
-    'screen--v2',
-    'screen--md',
-    'screen--1x'
-  ]
+  isDarkMode: false
 }
 ```
 
-#### `getScreenClasses()`
+#### `params` (getter)
 
-Get just the current screen classes array.
+Get serializable parameters (useful for persistence or API calls).
 
 ```javascript
-const screenClasses = picker.getScreenClasses()
+const params = picker.params
+// { modelName: 'og_plus', paletteId: '123', isPortrait: false, isDarkMode: false }
+
+// Save to localStorage
+localStorage.setItem('picker', JSON.stringify(picker.params))
+```
+
+**Returns:** Object with `modelName`, `paletteId`, `isPortrait`, and `isDarkMode`
+
+#### `screenClasses` (getter)
+
+Get CSS classes for the current configuration.
+
+```javascript
+const classes = picker.screenClasses
 // ['screen', 'screen--1bit', 'screen--v2', 'screen--md', 'screen--1x']
 ```
 
-**Returns:** `Array<string>` - Array of CSS class names
+**Returns:** `Array<string>` - Array of CSS class names in priority order
 
 #### `destroy()`
 
@@ -221,15 +220,16 @@ picker.destroy()
 
 ### Events
 
-#### `trmnl:changed` Event
+#### `trmnl:change` Event
 
 Emitted when:
 - User changes any selection (model, palette, orientation, or dark mode)
+- `setParams()` is called programmatically
 - **On initialization** - allows you to get the initial state immediately
 
 ```javascript
-document.getElementById('picker-form').addEventListener('trmnl:changed', (event) => {
-  const { source, screenClasses, state } = event.detail
+document.getElementById('picker-form').addEventListener('trmnl:change', (event) => {
+  const { origin, screenClasses, model, palette, isPortrait, isDarkMode } = event.detail
   // Handle the change
 })
 ```
@@ -239,16 +239,19 @@ document.getElementById('picker-form').addEventListener('trmnl:changed', (event)
 **Event Detail Structure:**
 ```javascript
 {
-  source: 'initial' | 'form' | 'update',
-  screenClasses: [...],
-  state: {
-    model: { name, label, width, height, kind, css: {...} },
-    palette: { id, name, framework_class },
-    isPortrait: false,
-    isDarkMode: false
-  }
+  origin: 'constructor' | 'form' | 'setParams',  // What triggered the change
+  screenClasses: ['screen', 'screen--1bit', 'screen--v2', 'screen--md', 'screen--1x'],
+  model: { name, label, width, height, kind, css: {...} },
+  palette: { id, name, framework_class },
+  isPortrait: false,
+  isDarkMode: false
 }
 ```
+
+**Origin Values:**
+- `'constructor'` - Initial state or loaded from localStorage
+- `'form'` - User interaction with form controls
+- `'setParams'` - Programmatic update via `setParams()` method
 
 ## Form Elements
 
@@ -272,7 +275,7 @@ See [example/index.html](example/index.html) for a complete working example with
 ### Applying Classes to Screen Elements
 
 ```javascript
-document.getElementById('picker-form').addEventListener('trmnl:changed', (event) => {
+document.getElementById('picker-form').addEventListener('trmnl:change', (event) => {
   const { screenClasses } = event.detail
 
   // Apply to all elements with class 'screen'

@@ -1,13 +1,40 @@
+/**
+ * Default model to select when no localStorage state is found
+ * @constant {string}
+ */
 const DEFAULT_MODEL_NAME = 'og_plus'
 
 /**
  * TRMNLPicker - Vanilla JS library for TRMNL device and palette selection
  *
+ * Provides a reactive picker component that manages device models, color palettes,
+ * orientation, and display mode. Emits 'trmnl:change' events with current state
+ * and CSS classes for rendering.
+ *
  * @class TRMNLPicker
- * @param {string} formId - ID of the form element containing picker controls
+ * @param {string|Element} formIdOrElement - Form element ID or DOM element reference
  * @param {Object} options - Configuration options
- * @param {Array<Object>} options.models - Optional array of model objects from API
- * @param {Array<Object>} options.palettes - Optional array of palette objects
+ * @param {Array<Object>} options.models - Array of model objects from TRMNL API
+ * @param {Array<Object>} options.palettes - Array of palette objects from TRMNL API
+ * @param {string} [options.localStorageKey] - Optional key for persisting state to localStorage
+ *
+ * @fires trmnl:change - Emitted when picker state changes, includes origin, state, and screenClasses
+ *
+ * @example
+ * // Create with element ID
+ * const picker = new TRMNLPicker('screen-picker', { models, palettes })
+ *
+ * // Create with DOM element
+ * const element = document.getElementById('picker')
+ * const picker = new TRMNLPicker(element, { models, palettes })
+ *
+ * // Listen for changes
+ * picker.formElement.addEventListener('trmnl:change', (event) => {
+ *   console.log(event.detail.origin) // 'form', 'setParams', 'constructor'
+ *   console.log(event.detail.model)
+ *   console.log(event.detail.palette)
+ *   console.log(event.detail.screenClasses)
+ * })
  */
 class TRMNLPicker {
   static API_BASE_URL = 'https://usetrmnl.com'
@@ -15,11 +42,20 @@ class TRMNLPicker {
   /**
    * Create a TRMNLPicker instance, fetching data from TRMNL API if not provided
    * @static
-   * @param {string} formId - ID of the form element
+   * @param {string|Element} formIdOrElement - Form element ID or DOM element
    * @param {Object} options - Configuration options
-   * @param {Array<Object>} options.models - Optional models array
-   * @param {Array<Object>} options.palettes - Optional palettes array
+   * @param {Array<Object>} [options.models] - Optional models array (fetched from API if not provided)
+   * @param {Array<Object>} [options.palettes] - Optional palettes array (fetched from API if not provided)
+   * @param {string} [options.localStorageKey] - Optional key for state persistence
    * @returns {Promise<TRMNLPicker>} Promise resolving to picker instance
+   * @throws {Error} If API fetch fails when models or palettes are not provided
+   *
+   * @example
+   * // Fetch models and palettes from API
+   * const picker = await TRMNLPicker.create('screen-picker')
+   *
+   * // Provide your own data
+   * const picker = await TRMNLPicker.create('screen-picker', { models, palettes })
    */
   static async create(formId, options = {}) {
     let { models, palettes, localStorageKey } = options
@@ -297,6 +333,16 @@ class TRMNLPicker {
   /**
    * Emit 'trmnl:change' event with current state and screen classes
    * @private
+   * @param {string} origin - Source of the change ('constructor', 'form', 'setParams')
+   * @fires trmnl:change
+   *
+   * Event detail includes:
+   * - origin: string - What triggered the change
+   * - model: Object - Current model object with name, label, size, etc.
+   * - palette: Object - Current palette object with id, name, framework_class
+   * - isPortrait: boolean - Portrait orientation flag
+   * - isDarkMode: boolean - Dark mode flag
+   * - screenClasses: Array<string> - CSS classes for rendering
    */
   _emitChangeEvent(origin) {
     // Save to localStorage if key is configured
@@ -428,9 +474,22 @@ class TRMNLPicker {
   }
 
   /**
-   * Get current screen classes
+   * Get CSS classes for the current picker configuration
    * @public
-   * @returns {Array<string>} Array of CSS class names
+   * @returns {Array<string>} Array of CSS class names for Framework CSS rendering
+   *
+   * Generated classes (in order):
+   * 1. 'screen' - Base class (always present)
+   * 2. palette.framework_class - From selected palette (e.g., 'screen--1bit')
+   * 3. model.css.classes.device - From model API (e.g., 'screen--v2')
+   * 4. model.css.classes.size - From model API (e.g., 'screen--md')
+   * 5. 'screen--portrait' - Only when portrait orientation is enabled
+   * 6. 'screen--1x' - Scale indicator (always 1x)
+   * 7. 'screen--dark-mode' - Only when dark mode is enabled
+   *
+   * @example
+   * const classes = picker.screenClasses
+   * // ['screen', 'screen--1bit', 'screen--v2', 'screen--md', 'screen--1x']
    */
   get screenClasses() {
     const model = this._state.model
@@ -477,9 +536,20 @@ class TRMNLPicker {
   }
 
   /**
-   * Get current picker parameters
+   * Get current picker parameters (serializable state)
    * @public
-   * @returns {Object} Current parameters including model name, palette ID, and flags
+   * @returns {Object} Current parameters for persistence or API calls
+   * @returns {string} return.modelName - Selected model name
+   * @returns {string} return.paletteId - Selected palette ID
+   * @returns {boolean} return.isPortrait - Portrait orientation flag
+   * @returns {boolean} return.isDarkMode - Dark mode flag
+   *
+   * @example
+   * const params = picker.params
+   * // { modelName: 'og_plus', paletteId: '123', isPortrait: false, isDarkMode: false }
+   *
+   * // Can be used to restore state later
+   * localStorage.setItem('picker-state', JSON.stringify(picker.params))
    */
   get params() {
     return {
@@ -491,18 +561,40 @@ class TRMNLPicker {
   }
 
   /**
-   * Update picker with new configuration
+   * Update picker configuration programmatically
    * @public
-   * @param {Object} params - Configuration object
-   * @param {string} params.modelName - Model name to select
-   * @param {string} params.paletteId - Palette ID to select
-   * @param {boolean} params.isPortrait - Portrait orientation
-   * @param {boolean} params.isDarkMode - Dark mode enabled
+   * @param {Object} params - Configuration object (all fields optional)
+   * @param {string} [params.modelName] - Model name to select
+   * @param {string} [params.paletteId] - Palette ID to select
+   * @param {boolean} [params.isPortrait] - Portrait orientation
+   * @param {boolean} [params.isDarkMode] - Dark mode enabled
+   * @fires trmnl:change - If any parameter changed successfully
+   * @throws {Error} If params is not an object
+   *
+   * @example
+   * // Update single parameter
+   * picker.setParams({ isDarkMode: true })
+   *
+   * // Update multiple parameters
+   * picker.setParams({
+   *   modelName: 'og_plus',
+   *   paletteId: '123',
+   *   isPortrait: true
+   * })
+   *
+   * // Note: Changing model resets palette to first valid palette of that model
    */
   setParams(params) {
     this._setParams('setParams', params)
   }
 
+  /**
+   * Internal method to update picker state with origin tracking
+   * @private
+   * @param {string} origin - Source of change ('constructor', 'form', 'setParams')
+   * @param {Object} params - Parameters to update
+   * @returns {boolean} True if any changes were made
+   */
   _setParams(origin, params) {
     if (!params || typeof params !== 'object') {
       throw new Error('params must be an object')
@@ -565,6 +657,24 @@ class TRMNLPicker {
     return changed
   }
 
+  /**
+   * Get complete picker state including full model and palette objects
+   * @public
+   * @returns {Object} Current state
+   * @returns {Object} return.model - Full model object from API
+   * @returns {Object} return.palette - Full palette object from API
+   * @returns {boolean} return.isPortrait - Portrait orientation flag
+   * @returns {boolean} return.isDarkMode - Dark mode flag
+   *
+   * @example
+   * const state = picker.state
+   * // {
+   * //   model: { name: 'og_plus', label: 'OG+', width: 800, height: 480, ... },
+   * //   palette: { id: '123', name: 'Black', framework_class: 'screen--1bit', ... },
+   * //   isPortrait: false,
+   * //   isDarkMode: false
+   * // }
+   */
   get state() {
     return { ...this._state, };
   }
