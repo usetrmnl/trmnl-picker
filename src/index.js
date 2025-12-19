@@ -16,6 +16,8 @@ const _DEFAULT_MODEL_NAME = 'og_plus'
  * @property {Object} detail.palette - Current palette object with id, name, framework_class properties
  * @property {boolean} detail.isPortrait - Portrait orientation flag
  * @property {boolean} detail.isDarkMode - Dark mode flag
+ * @property {number} detail.width - Current width of the screen in pixels
+ * @property {number} detail.height - Current height of the screen in pixels
  *
  * @example
  * picker.formElement.addEventListener('trmnl:change', (event) => {
@@ -389,7 +391,6 @@ class TRMNLPicker {
     const event = new CustomEvent('trmnl:change', {
       detail: {
         origin,
-        screenClasses: this.screenClasses,
         ...this.state,
       },
       bubbles: true
@@ -513,7 +514,7 @@ class TRMNLPicker {
 
   /**
    * Get CSS classes for the current picker configuration
-   * @public
+   * @private
    * @returns {Array<string>} Array of CSS class names for Framework CSS rendering
    *
    * Generated classes (in order):
@@ -529,7 +530,7 @@ class TRMNLPicker {
    * const classes = picker.screenClasses
    * // ['screen', 'screen--1bit', 'screen--v2', 'screen--md', 'screen--1x']
    */
-  get screenClasses() {
+  get _screenClasses() {
     const model = this._state.model
     const palette = this._state.palette
 
@@ -702,7 +703,10 @@ class TRMNLPicker {
    *   model: Object,
    *   palette: Object,
    *   isPortrait: boolean,
-   *   isDarkMode: boolean
+   *   isDarkMode: boolean,
+   *   screenClasses: Array<string>,
+   *   width: number,
+   *   height: number
    * }} State object containing model (full model object from API), palette (full palette object from API), isPortrait flag, and isDarkMode flag
    *
    * @example
@@ -711,11 +715,36 @@ class TRMNLPicker {
    * //   model: { name: 'og_plus', label: 'OG+', width: 800, height: 480, ... },
    * //   palette: { id: '123', name: 'Black', framework_class: 'screen--1bit', ... },
    * //   isPortrait: false,
-   * //   isDarkMode: false
+   * //   isDarkMode: false,
+   * //   screenClasses: ['screen', 'screen--1bit', 'screen--v2', 'screen--md', 'screen--1x'],
+   * //   width: 800,
+   * //   height: 480
    * // }
    */
   get state() {
-    return { ...this._state, };
+    return {
+      screenClasses: this._screenClasses,
+      ...this._dimensions,
+      ...this._state,
+    };
+  }
+
+  /**
+   * Get current dimensions (width and height) of the screen in pixels
+   * @private
+   * @returns {{ width: number, height: number }} Object with width and height properties
+   */
+  get _dimensions() {
+    const model = this._state.model
+
+    let width = model.width / model.scale_factor
+    let height = model.height / model.scale_factor
+
+    if (this._state.isPortrait) {
+      [width, height] = [height, width]
+    }
+
+    return { width, height }
   }
 
   /**
