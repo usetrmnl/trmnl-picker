@@ -1,9 +1,56 @@
 // src/index.js
 var _DEFAULT_MODEL_NAME = "og_plus";
+var _API_CACHE_KEY = "trmnl-picker-api-cache";
+var _CACHE_TTL_MS = 24 * 60 * 60 * 1e3;
 var TRMNLPicker = class _TRMNLPicker {
   static API_BASE_URL = "https://usetrmnl.com";
   /**
+   * Get cached API response from localStorage
+   * @private
+   * @static
+   * @returns {{models: Array, palettes: Array} | null} Cached data or null if expired/missing
+   */
+  static _getCachedApiData() {
+    try {
+      const cached = localStorage.getItem(_API_CACHE_KEY);
+      if (!cached)
+        return null;
+      const { timestamp, models, palettes } = JSON.parse(cached);
+      const now = Date.now();
+      if (now - timestamp > _CACHE_TTL_MS) {
+        localStorage.removeItem(_API_CACHE_KEY);
+        return null;
+      }
+      return { models, palettes };
+    } catch (error) {
+      console.warn("TRMNLPicker: Failed to read API cache:", error);
+      return null;
+    }
+  }
+  /**
+   * Save API response to localStorage cache
+   * @private
+   * @static
+   * @param {Array} models - Models array
+   * @param {Array} palettes - Palettes array
+   */
+  static _setCachedApiData(models, palettes) {
+    try {
+      const cacheData = {
+        timestamp: Date.now(),
+        models,
+        palettes
+      };
+      localStorage.setItem(_API_CACHE_KEY, JSON.stringify(cacheData));
+    } catch (error) {
+      console.warn("TRMNLPicker: Failed to save API cache:", error);
+    }
+  }
+  /**
    * Create a TRMNLPicker instance, fetching data from TRMNL API if not provided
+   *
+   * Automatically caches API responses in localStorage for 24 hours to reduce network requests.
+   *
    * @static
    * @param {string|Element} formIdOrElement - Form element ID or DOM element
    * @param {Object} options - Configuration options
@@ -14,7 +61,7 @@ var TRMNLPicker = class _TRMNLPicker {
    * @throws {Error} If API fetch fails when models or palettes are not provided
    *
    * @example
-   * // Fetch models and palettes from API
+   * // Fetch models and palettes from API (or use cached data if available)
    * const picker = await TRMNLPicker.create('screen-picker')
    *
    * // Provide your own data
@@ -22,6 +69,13 @@ var TRMNLPicker = class _TRMNLPicker {
    */
   static async create(formId, options = {}) {
     let { models, palettes, localStorageKey } = options;
+    if (!models && !palettes) {
+      const cached = _TRMNLPicker._getCachedApiData();
+      if (cached) {
+        models = cached.models;
+        palettes = cached.palettes;
+      }
+    }
     if (!models) {
       try {
         const response = await fetch(`${_TRMNLPicker.API_BASE_URL}/api/models`);
@@ -45,6 +99,9 @@ var TRMNLPicker = class _TRMNLPicker {
       } catch (error) {
         throw new Error(`TRMNLPicker: Failed to fetch palettes from API: ${error.message}`);
       }
+    }
+    if (!options.models && !options.palettes) {
+      _TRMNLPicker._setCachedApiData(models, palettes);
     }
     return new _TRMNLPicker(formId, { models, palettes, localStorageKey });
   }
@@ -245,7 +302,6 @@ var TRMNLPicker = class _TRMNLPicker {
     const event = new CustomEvent("trmnl:change", {
       detail: {
         origin,
-        screenClasses: this.screenClasses,
         ...this.state
       },
       bubbles: true
@@ -353,7 +409,7 @@ var TRMNLPicker = class _TRMNLPicker {
   }
   /**
    * Get CSS classes for the current picker configuration
-   * @public
+   * @private
    * @returns {Array<string>} Array of CSS class names for Framework CSS rendering
    *
    * Generated classes (in order):
@@ -369,7 +425,7 @@ var TRMNLPicker = class _TRMNLPicker {
    * const classes = picker.screenClasses
    * // ['screen', 'screen--1bit', 'screen--v2', 'screen--md', 'screen--1x']
    */
-  get screenClasses() {
+  get _screenClasses() {
     const model = this._state.model;
     const palette = this._state.palette;
     if (!model) {
@@ -507,7 +563,10 @@ var TRMNLPicker = class _TRMNLPicker {
    *   model: Object,
    *   palette: Object,
    *   isPortrait: boolean,
-   *   isDarkMode: boolean
+   *   isDarkMode: boolean,
+   *   screenClasses: Array<string>,
+   *   width: number,
+   *   height: number
    * }} State object containing model (full model object from API), palette (full palette object from API), isPortrait flag, and isDarkMode flag
    *
    * @example
@@ -516,11 +575,32 @@ var TRMNLPicker = class _TRMNLPicker {
    * //   model: { name: 'og_plus', label: 'OG+', width: 800, height: 480, ... },
    * //   palette: { id: '123', name: 'Black', framework_class: 'screen--1bit', ... },
    * //   isPortrait: false,
-   * //   isDarkMode: false
+   * //   isDarkMode: false,
+   * //   screenClasses: ['screen', 'screen--1bit', 'screen--v2', 'screen--md', 'screen--1x'],
+   * //   width: 800,
+   * //   height: 480
    * // }
    */
   get state() {
-    return { ...this._state };
+    return {
+      screenClasses: this._screenClasses,
+      ...this._dimensions,
+      ...this._state
+    };
+  }
+  /**
+   * Get current dimensions (width and height) of the screen in pixels
+   * @private
+   * @returns {{ width: number, height: number }} Object with width and height properties
+   */
+  get _dimensions() {
+    const model = this._state.model;
+    let width = model.width / model.scale_factor;
+    let height = model.height / model.scale_factor;
+    if (this._state.isPortrait) {
+      [width, height] = [height, width];
+    }
+    return { width, height };
   }
   /**
    * Clean up event listeners and references

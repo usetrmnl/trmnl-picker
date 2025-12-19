@@ -63,12 +63,6 @@
                       <li class='h5'><span>Instance members</span></li>
                       
                       <li><a
-                        href='#trmnlpickerscreenclasses'
-                        class='regular pre-open'>
-                        #screenClasses
-                      </a></li>
-                      
-                      <li><a
                         href='#trmnlpickerparams'
                         class='regular pre-open'>
                         #params
@@ -182,6 +176,16 @@
                 <li><code>detail.isDarkMode</code> <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>
                   
                   <p>Dark mode flag</p>
+</li>
+              
+                <li><code>detail.width</code> <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>
+                  
+                  <p>Current width of the screen in pixels</p>
+</li>
+              
+                <li><code>detail.height</code> <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>
+                  
+                  <p>Current height of the screen in pixels</p>
 </li>
               
             </ul>
@@ -387,6 +391,7 @@ picker.<span class="hljs-property">formElement</span>.<span class="hljs-title fu
   
 
   <p>Create a TRMNLPicker instance, fetching data from TRMNL API if not provided</p>
+<p>Automatically caches API responses in localStorage for 24 hours to reduce network requests.</p>
 
     <div class='pre p1 fill-light mt0'>create(formId: any, options: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, formIdOrElement: (<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a> | <a href="https://developer.mozilla.org/docs/Web/API/Element">Element</a>)): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&#x3C;<a href="#trmnlpicker">TRMNLPicker</a>></div>
   
@@ -504,7 +509,7 @@ picker.<span class="hljs-property">formElement</span>.<span class="hljs-title fu
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// Fetch models and palettes from API</span>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// Fetch models and palettes from API (or use cached data if available)</span>
 <span class="hljs-keyword">const</span> picker = <span class="hljs-keyword">await</span> <span class="hljs-title class_">TRMNLPicker</span>.<span class="hljs-title function_">create</span>(<span class="hljs-string">&#x27;screen-picker&#x27;</span>)
 
 <span class="hljs-comment">// Provide your own data</span>
@@ -531,80 +536,6 @@ picker.<span class="hljs-property">formElement</span>.<span class="hljs-title fu
   
     <div class='py1 quiet mt1 prose-big'>Instance Members</div>
     <div class="clearfix">
-  
-    <div class='border-bottom' id='trmnlpickerscreenclasses'>
-      <div class="clearfix small pointer toggle-sibling">
-        <div class="py1 contain">
-            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>screenClasses</span>
-        </div>
-      </div>
-      <div class='clearfix toggle-target'>
-        <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-
-  <p>Get CSS classes for the current picker configuration</p>
-
-    <div class='pre p1 fill-light mt0'>screenClasses</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>></code>:
-        Array of CSS class names for Framework CSS rendering
-<p>Generated classes (in order):</p>
-<ol>
-<li>'screen' - Base class (always present)</li>
-<li>palette.framework_class - From selected palette (e.g., 'screen--1bit')</li>
-<li>model.css.classes.device - From model API (e.g., 'screen--v2')</li>
-<li>model.css.classes.size - From model API (e.g., 'screen--md')</li>
-<li>'screen--portrait' - Only when portrait orientation is enabled</li>
-<li>'screen--1x' - Scale indicator (always 1x)</li>
-<li>'screen--dark-mode' - Only when dark mode is enabled</li>
-</ol>
-
-      
-    
-  
-
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Example</div>
-    
-      
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> classes = picker.<span class="hljs-property">screenClasses</span>
-<span class="hljs-comment">// [&#x27;screen&#x27;, &#x27;screen--1bit&#x27;, &#x27;screen--v2&#x27;, &#x27;screen--md&#x27;, &#x27;screen--1x&#x27;]</span></pre>
-    
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-      </div>
-    </div>
   
     <div class='border-bottom' id='trmnlpickerparams'>
       <div class="clearfix small pointer toggle-sibling">
@@ -868,7 +799,7 @@ picker.<span class="hljs-title function_">setParams</span>({
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code>{model: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, palette: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, isPortrait: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>, isDarkMode: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>}</code>:
+      <code>{model: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, palette: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>, isPortrait: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>, isDarkMode: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>, screenClasses: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>>, width: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, height: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>}</code>:
         State object containing model (full model object from API), palette (full palette object from API), isPortrait flag, and isDarkMode flag
 
       
@@ -888,7 +819,10 @@ picker.<span class="hljs-title function_">setParams</span>({
 <span class="hljs-comment">//   model: { name: &#x27;og_plus&#x27;, label: &#x27;OG+&#x27;, width: 800, height: 480, ... },</span>
 <span class="hljs-comment">//   palette: { id: &#x27;123&#x27;, name: &#x27;Black&#x27;, framework_class: &#x27;screen--1bit&#x27;, ... },</span>
 <span class="hljs-comment">//   isPortrait: false,</span>
-<span class="hljs-comment">//   isDarkMode: false</span>
+<span class="hljs-comment">//   isDarkMode: false,</span>
+<span class="hljs-comment">//   screenClasses: [&#x27;screen&#x27;, &#x27;screen--1bit&#x27;, &#x27;screen--v2&#x27;, &#x27;screen--md&#x27;, &#x27;screen--1x&#x27;],</span>
+<span class="hljs-comment">//   width: 800,</span>
+<span class="hljs-comment">//   height: 480</span>
 <span class="hljs-comment">// }</span></pre>
     
   
