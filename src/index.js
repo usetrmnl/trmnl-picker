@@ -6,6 +6,20 @@
 const _DEFAULT_MODEL_NAME = 'og_plus'
 
 /**
+ * localStorage key for caching API responses (models and palettes)
+ * @private
+ * @constant {string}
+ */
+const _API_CACHE_KEY = 'trmnl-picker-api-cache'
+
+/**
+ * Cache TTL in milliseconds (1 day)
+ * @private
+ * @constant {number}
+ */
+const _CACHE_TTL_MS = 24 * 60 * 60 * 1000
+
+/**
  * Event fired when picker state changes
  * @event TRMNLPicker#trmnl:change
  * @type {CustomEvent}
@@ -88,7 +102,57 @@ class TRMNLPicker {
   static API_BASE_URL = 'https://usetrmnl.com'
 
   /**
+   * Get cached API response from localStorage
+   * @private
+   * @static
+   * @returns {{models: Array, palettes: Array} | null} Cached data or null if expired/missing
+   */
+  static _getCachedApiData() {
+    try {
+      const cached = localStorage.getItem(_API_CACHE_KEY)
+      if (!cached) return null
+
+      const { timestamp, models, palettes } = JSON.parse(cached)
+      const now = Date.now()
+
+      // Check if cache is still valid
+      if (now - timestamp > _CACHE_TTL_MS) {
+        localStorage.removeItem(_API_CACHE_KEY)
+        return null
+      }
+
+      return { models, palettes }
+    } catch (error) {
+      console.warn('TRMNLPicker: Failed to read API cache:', error)
+      return null
+    }
+  }
+
+  /**
+   * Save API response to localStorage cache
+   * @private
+   * @static
+   * @param {Array} models - Models array
+   * @param {Array} palettes - Palettes array
+   */
+  static _setCachedApiData(models, palettes) {
+    try {
+      const cacheData = {
+        timestamp: Date.now(),
+        models,
+        palettes
+      }
+      localStorage.setItem(_API_CACHE_KEY, JSON.stringify(cacheData))
+    } catch (error) {
+      console.warn('TRMNLPicker: Failed to save API cache:', error)
+    }
+  }
+
+  /**
    * Create a TRMNLPicker instance, fetching data from TRMNL API if not provided
+   *
+   * Automatically caches API responses in localStorage for 24 hours to reduce network requests.
+   *
    * @static
    * @param {string|Element} formIdOrElement - Form element ID or DOM element
    * @param {Object} options - Configuration options
@@ -99,7 +163,7 @@ class TRMNLPicker {
    * @throws {Error} If API fetch fails when models or palettes are not provided
    *
    * @example
-   * // Fetch models and palettes from API
+   * // Fetch models and palettes from API (or use cached data if available)
    * const picker = await TRMNLPicker.create('screen-picker')
    *
    * // Provide your own data
@@ -108,7 +172,16 @@ class TRMNLPicker {
   static async create(formId, options = {}) {
     let { models, palettes, localStorageKey } = options
 
-    // Fetch models if not provided
+    // Try to use cached data if neither models nor palettes are provided
+    if (!models && !palettes) {
+      const cached = TRMNLPicker._getCachedApiData()
+      if (cached) {
+        models = cached.models
+        palettes = cached.palettes
+      }
+    }
+
+    // Fetch models if not provided and not in cache
     if (!models) {
       try {
         const response = await fetch(`${TRMNLPicker.API_BASE_URL}/api/models`)
@@ -122,7 +195,7 @@ class TRMNLPicker {
       }
     }
 
-    // Fetch palettes if not provided
+    // Fetch palettes if not provided and not in cache
     if (!palettes) {
       try {
         const response = await fetch(`${TRMNLPicker.API_BASE_URL}/api/palettes`)
@@ -134,6 +207,11 @@ class TRMNLPicker {
       } catch (error) {
         throw new Error(`TRMNLPicker: Failed to fetch palettes from API: ${error.message}`)
       }
+    }
+
+    // Cache the API data for future use (if both were fetched)
+    if (!options.models && !options.palettes) {
+      TRMNLPicker._setCachedApiData(models, palettes)
     }
 
     return new TRMNLPicker(formId, { models, palettes, localStorageKey })
