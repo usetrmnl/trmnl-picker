@@ -1,6 +1,6 @@
 {
   "name": "@trmnl/picker",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Vanilla JavaScript library for TRMNL device model and palette selection",
   "main": "dist/trmnl-picker.js",
   "module": "dist/trmnl-picker.esm.js",
