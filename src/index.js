@@ -415,20 +415,18 @@ class TRMNLPicker {
     // Initialize state
     this._state = {}
 
-    const savedParams = this._loadFromLocalStorage()
-    if (savedParams) {
-      this._setParams('constructor', savedParams)
-    } else {
-      const defaultModel = sortedModels.find(m => m.name === _DEFAULT_MODEL_NAME) || sortedModels[0]
-      const defaultPaletteId = this._getFirstValidPaletteId(defaultModel)
-
-      this._setParams('constructor', {
-        modelName: defaultModel.name,
-        paletteId: defaultPaletteId,
-        isPortrait: false,
-        isDarkMode: false
-      })
+    const defaultModel = sortedModels.find(m => m.name === _DEFAULT_MODEL_NAME) || sortedModels[0]
+    const defaultPaletteId = this._getFirstValidPaletteId(defaultModel)
+    const defaultParams = {
+      modelName: defaultModel.name,
+      paletteId: defaultPaletteId,
+      isPortrait: false,
+      isDarkMode: false
     }
+
+    const savedParams = this._loadFromLocalStorage() || {}
+
+    this._setParams('constructor', { ...defaultParams, ...savedParams })
   }
 
   /**
