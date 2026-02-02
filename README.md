@@ -2,7 +2,7 @@
 
 A lightweight JavaScript library for managing TRMNL device model and palette selection.
 
-It's used by the core TRMNL web app, [trmnlp](https://github.com/usetrmnl/trmnlp), [BYOS (Bring Your Own Server)](https://docs.usetrmnl.com/go/diy/byos) applications, and anybody else who needs it.
+It's used by the core TRMNL web app, [trmnlp](https://github.com/usetrmnl/trmnlp), [BYOS (Bring Your Own Server)](https://docs.trmnl.com/go/diy/byos) applications, and anybody else who needs it.
 
 ![Screenshot](example/screenshot.png)
 

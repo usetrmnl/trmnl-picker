@@ -99,7 +99,7 @@ const _CACHE_TTL_MS = 24 * 60 * 60 * 1000
  * })
  */
 class TRMNLPicker {
-  static API_BASE_URL = 'https://usetrmnl.com'
+  static API_BASE_URL = 'https://trmnl.com'
 
   /**
    * Get cached API response from localStorage
